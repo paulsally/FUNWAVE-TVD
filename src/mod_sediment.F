@@ -129,8 +129,6 @@ SUBROUTINE SEDIMENT_INITIAL
 ! read  from input.txt
       FILE_NAME=INPUT_FILE_NAME
 
-      WRITE(*,*) '----------------------'
-      WRITE(*,*) FILE_NAME
 ! input is based on Babaks original but make default values
       CALL READ_STRING(Sed_Scheme,FILE_NAME,'Sed_Scheme',ierr)
 
