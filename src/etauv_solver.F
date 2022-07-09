@@ -63,20 +63,32 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 ! now work for spherical # if defined (CARTESIAN)
      REAL(SP)::xmk,ymk
 ! now work for spherical # endif
-     REAL(SP)::DXg,DYg
+!     REAL(SP)::DXg,DYg
 
      INTEGER::kf,kd
 
 ! MUSCL-Hancock, Zhou et al., p. 7
 
-# if defined (CARTESIAN)
-     DXg=DX
-     DYg=DY
-# else
+! this part was moved to init.F and DXg and DYg are global
+!# if defined (CARTESIAN)
+!     DXg=DX
+!     DYg=DY
+!# else
 ! only for wavemaker
-     DXg=DX(1,1)
-     DYg=DY(1,1)
-# endif
+!     DXg=DX(1,1)
+!     DYg=DY(1,1)
+!# endif
+
+! for radiation stress calculation
+
+     DO J=Jbeg,Jend
+     DO I=Ibeg,Iend
+       P_center(I,J)=0.5_SP*(P(I+1,J)+P(I,J))
+       Q_center(I,J)=0.5_SP*(Q(I,J+1)+Q(I,J))
+       U_davg(I,J) = P_center(I,J)/Max(H(I,J),MinDepthFrc)
+       V_davg(I,J) = Q_center(I,J)/Max(H(I,J),MinDepthFrc)
+     ENDDO
+     ENDDO
 
 ! solve eta
      DO J=Jbeg,Jend
@@ -221,6 +233,9 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 
 # endif
 
+! evaluate vertical velocity at surface O(mu^2), fyshi 07/07/2022
+     Wsurf(I,J) = R1(I,J)
+
 # if defined (ITERATION)
       Eta(I,J)=ALPHA(ISTEP)*Eta0(I,J)+BETA(ISTEP)*(EtaOld(I,J)+DT*R1(I,J))
 # else
@@ -285,6 +300,7 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
      ENDDO
 
      CALL GET_Eta_U_V_HU_HV
+
 
 END SUBROUTINE ESTIMATE_HUV
 

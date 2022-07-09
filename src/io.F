@@ -3405,6 +3405,7 @@ SUBROUTINE READ_INPUT
       CALL READ_LOGICAL(OUT_UNDERTOW,FILE_NAME,'UNDERTOW',ierr)
       CALL READ_LOGICAL(OUT_NU,FILE_NAME,'OUT_NU',ierr)
       CALL READ_LOGICAL(OUT_TMP,FILE_NAME,'TMP',ierr) 
+      CALL READ_LOGICAL(OUT_Radiation,FILE_NAME,'Radiation',ierr) 
 
 !ykchoi
 !	CALL READ_FLOAT(EtaBlowVal,FILE_NAME,'EtaBlowVal',ierr)
@@ -4439,6 +4440,7 @@ END SUBROUTINE PREVIEW
 SUBROUTINE PREVIEW_MEAN
      USE GLOBAL
      IMPLICIT NONE
+     REAL(SP),DIMENSION(Mloc,Nloc) :: tmpout 
 
      CHARACTER(LEN=80)::FILE_NAME=' '
      CHARACTER(LEN=80)::FDIR=' '
@@ -4474,10 +4476,16 @@ SUBROUTINE PREVIEW_MEAN
         IF(OUT_Umean)THEN
           TMP_NAME = TRIM(FDIR)//'umean_'//TRIM(FILE_NAME)
           call PutFile(TMP_NAME,Umean)
+          tmpout = P_mean / Max(Depth+ETAmean,MinDepthFrc)
+          TMP_NAME = TRIM(FDIR)//'ulagm_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,tmpout)
         ENDIF
         IF(OUT_Vmean)THEN
           TMP_NAME = TRIM(FDIR)//'vmean_'//TRIM(FILE_NAME)
           call PutFile(TMP_NAME,Vmean)
+          tmpout = Q_mean / Max(Depth+ETAmean,MinDepthFrc)
+          TMP_NAME = TRIM(FDIR)//'vlagm_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,tmpout)
         ENDIF
         IF(OUT_ETAmean)THEN
           TMP_NAME = TRIM(FDIR)//'etamean_'//TRIM(FILE_NAME)
@@ -4490,6 +4498,36 @@ SUBROUTINE PREVIEW_MEAN
           call PutFile(TMP_NAME,WaveHeightAve)
           TMP_NAME = TRIM(FDIR)//'Hsig_'//TRIM(FILE_NAME)
           call PutFile(TMP_NAME,SigWaveHeight)
+        ENDIF
+
+ ! output FRCYsum,FRCYmean
+ !        DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH
+
+        IF(OUT_Radiation)THEN
+          TMP_NAME = TRIM(FDIR)//'DxSxx_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DxSxx)
+          TMP_NAME = TRIM(FDIR)//'DySxy_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DySxy)
+          TMP_NAME = TRIM(FDIR)//'DySyy_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DySyy)
+          TMP_NAME = TRIM(FDIR)//'DxSxy_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DxSxy)
+          TMP_NAME = TRIM(FDIR)//'PgrdX_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,PgrdX)
+          TMP_NAME = TRIM(FDIR)//'PgrdY_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,PgrdY)
+          TMP_NAME = TRIM(FDIR)//'DxUUH_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DxUUH)
+          TMP_NAME = TRIM(FDIR)//'DyUVH_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DyUVH)
+          TMP_NAME = TRIM(FDIR)//'DyVVH_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DyVVH)
+          TMP_NAME = TRIM(FDIR)//'DxUVH_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,DxUVH)
+          TMP_NAME = TRIM(FDIR)//'FRCX_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,FRCXmean)
+          TMP_NAME = TRIM(FDIR)//'FRCY_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,FRCYmean)
         ENDIF
                     
 

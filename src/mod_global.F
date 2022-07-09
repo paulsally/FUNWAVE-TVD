@@ -133,6 +133,8 @@ MODULE GLOBAL
 # else
        REAL(SP) :: Lon_West,Lat_South,Dphi,Dtheta
 # endif
+       ! DXg and DYg for wavemaker only
+       REAL(SP) :: DXg,DYg  
        REAL(SP)::  DT,TIME,TOTAL_TIME,PLOT_INTV,PLOT_COUNT,&
                   SCREEN_INTV,SCREEN_COUNT, &
                    DT_fixed,PLOT_START_TIME
@@ -285,7 +287,13 @@ MODULE GLOBAL
 
 ! smagorinsky and wave height
       REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Umean,Vmean,&
-                  ETAmean,Usum,Vsum,ETAsum, nu_smg
+                  ETAmean,Usum,Vsum,ETAsum, nu_smg, &
+                  UUsum,UUmean,UVsum,UVmean,VVsum,VVmean, &
+                  WWsum,WWmean,FRCXsum,FRCXmean,FRCYsum,FRCYmean,Wsurf, &
+                  DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH, &
+                  P_center,Q_center,U_davg,V_davg,U_davg_sum,V_davg_sum, &
+                  U_davg_mean,V_davg_mean,P_sum,Q_sum, &
+                  P_mean,Q_mean
       REAL(SP)::T_INTV_mean = 20.0,T_sum=0.0,C_smg=0.25
       REAL(SP),DIMENSION(:,:),ALLOCATABLE :: &
                 WaveHeightRMS,WaveHeightAve,Emax,Emin,& 
@@ -359,8 +367,8 @@ MODULE GLOBAL
        LOGICAL :: OUT_Umean=.FALSE.,OUT_Vmean=.FALSE.,&
                   OUT_ETAmean=.FALSE.,&
                   OUT_WaveHeight = .FALSE.,&
-	          OUT_WaveHeightSig = .FALSE.    !ykchoi
-	 
+	          OUT_WaveHeightSig = .FALSE., &   
+	          OUT_Radiation = .FALSE.
 
 
 !# if defined (CARTESIAN)

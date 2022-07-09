@@ -102,6 +102,24 @@ SUBROUTINE ALLOCATE_VARIABLES
 ! others
               Umean(Mloc,Nloc),Vmean(Mloc,Nloc),ETAmean(Mloc,Nloc),&
               Usum(Mloc,Nloc),Vsum(Mloc,Nloc),ETAsum(Mloc,Nloc), &
+              UUsum(Mloc,Nloc),UUmean(Mloc,Nloc),&
+              UVsum(Mloc,Nloc),UVmean(Mloc,Nloc),&
+              VVsum(Mloc,Nloc),VVmean(Mloc,Nloc), &
+              WWsum(Mloc,Nloc),WWmean(Mloc,Nloc),&
+              FRCXsum(Mloc,Nloc),FRCXmean(Mloc,Nloc),&
+              FRCYsum(Mloc,Nloc),FRCYmean(Mloc,Nloc),&
+              Wsurf(Mloc,Nloc), &
+              DxSxx(Mloc,Nloc),DySxy(Mloc,Nloc), &
+              DySyy(Mloc,Nloc),DxSxy(Mloc,Nloc), &
+              PgrdX(Mloc,Nloc),PgrdY(Mloc,Nloc), &
+              DxUUH(Mloc,Nloc),DyUVH(Mloc,Nloc), &
+              DyVVH(Mloc,Nloc),DxUVH(Mloc,Nloc), &
+              P_center(Mloc,Nloc),Q_center(Mloc,Nloc), &
+              U_davg(Mloc,Nloc),V_davg(Mloc,Nloc), &
+              U_davg_sum(Mloc,Nloc),V_davg_sum(Mloc,Nloc), &
+              U_davg_mean(Mloc,Nloc),V_davg_mean(Mloc,Nloc), &
+              P_sum(Mloc,Nloc),Q_sum(Mloc,Nloc), &
+              P_mean(Mloc,Nloc),Q_mean(Mloc,Nloc),&
               nu_smg(Mloc,Nloc), &
               Num_Zero_Up(Mloc,Nloc), &
               WaveHeightRMS(Mloc,Nloc),  &
@@ -258,7 +276,8 @@ SUBROUTINE INITIALIZATION
 # endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    REAL(SP) :: DXg,DYg                                   ! Salatin et al. 2021
+!    REAL(SP) :: DXg,DYg                                   ! Salatin et al. 2021
+!     I moved to global since they will be used in multiple places
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!END!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # if !defined (CARTESIAN)
@@ -358,6 +377,41 @@ SUBROUTINE INITIALIZATION
      Umean = ZERO
      Vmean = ZERO
      ETAmean = ZERO
+     UUsum = ZERO
+     UUmean = ZERO
+     UVsum = ZERO
+     UVmean = ZERO
+     VVsum = ZERO
+     VVmean = ZERO
+     WWsum = ZERO
+     WWmean = ZERO
+     FRCXsum = ZERO
+     FRCXmean = ZERO
+     FRCYsum = ZERO
+     FRCYmean = ZERO
+     Wsurf = ZERO
+     DxSxx = ZERO
+     DySxy = ZERO
+     DySyy = ZERO
+     DxSxy = ZERO
+     PgrdX = ZERO
+     PgrdY = ZERO
+     DxUUH = ZERO
+     DyUVH = ZERO
+     DyVVH = ZERO
+     DxUVH = ZERO
+     P_center = ZERO
+     Q_center = ZERO
+     P_mean = ZERO
+     Q_mean = ZERO
+     P_sum = ZERO
+     Q_sum = ZERO
+     U_davg = ZERO
+     V_davg = ZERO
+     U_davg_mean = ZERO
+     V_davg_mean = ZERO
+     U_davg_sum = ZERO
+     V_davg_sum = ZERO
      nu_smg = ZERO
      Num_Zero_Up = 0
      WaveHeightRMS = ZERO

@@ -65,7 +65,7 @@ SUBROUTINE SourceTerms
      IMPLICIT NONE
      REAL,DIMENSION(Mloc,Nloc) :: nu_vis
      LOGICAL :: PQ_scheme = .FALSE.
-     REAL(SP) :: xmk,ymk,Dxg,Dyg,WK_Source
+     REAL(SP) :: xmk,ymk,WK_Source
      INTEGER :: kd,kf
      
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -76,14 +76,14 @@ SUBROUTINE SourceTerms
     INTEGER :: kf_index                                  ! Salatin et al. 2021
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!END!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-# if defined (CARTESIAN)
-     DXg=DX
-     DYg=DY
-# else
+!# if defined (CARTESIAN)
+!     DXg=DX
+!     DYg=DY
+!# else
 ! only for wavemaker
-     DXg=DX(1,1)
-     DYg=DY(1,1)
-# endif
+!     DXg=DX(1,1)
+!     DYg=DY(1,1)
+!# endif
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
