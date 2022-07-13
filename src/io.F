@@ -4504,6 +4504,15 @@ SUBROUTINE PREVIEW_MEAN
  !        DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH
 
         IF(OUT_Radiation)THEN
+          TMP_NAME = TRIM(FDIR)//'Sxx_'//TRIM(FILE_NAME)
+          tmpout = UUmean-WWmean+0.5*9.8*ETA2mean
+          call PutFile(TMP_NAME,tmpout)
+          TMP_NAME = TRIM(FDIR)//'Sxy_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,UVmean)
+          TMP_NAME = TRIM(FDIR)//'Syy_'//TRIM(FILE_NAME)
+          tmpout = VVmean-WWmean+0.5*9.8*ETA2mean
+          call PutFile(TMP_NAME,tmpout)
+
           TMP_NAME = TRIM(FDIR)//'DxSxx_'//TRIM(FILE_NAME)
           call PutFile(TMP_NAME,DxSxx)
           TMP_NAME = TRIM(FDIR)//'DySxy_'//TRIM(FILE_NAME)
