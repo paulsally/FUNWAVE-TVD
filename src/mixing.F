@@ -123,10 +123,11 @@ END SUBROUTINE MIXING_STUFF
       REAL(SP),DIMENSION(M,N),INTENT(OUT) :: DxSxx,DySxy,DySyy,DxSxy, &
                                             PgrdX,PgrdY,DxUUH,DyUVH, &
                                             DyVVH,DxUVH	
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: U_davg,V_davg,U_davg_sum,V_davg_sum, &
+      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: U_davg_sum,V_davg_sum, &
                                              U_davg_mean,V_davg_mean,&
-                                             P_center,Q_center,P_sum,Q_sum, &
+                                             P_sum,Q_sum, &
                                              P_mean,Q_mean
+      REAL(SP),DIMENSION(M,N),INTENT(IN) :: U_davg,V_davg,P_center,Q_center
 
 	!ykchoi
       REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: ETA2sum,ETA2mean,SigWaveHeight
