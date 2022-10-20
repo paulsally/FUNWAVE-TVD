@@ -9,14 +9,14 @@ TITLE = 2D_beach
    !    NOTE: make sure consistency with mpirun -np n (px*py) 
    !     
  PX = 2
- PY = 1
+ PY = 2
    ! --------------------DEPTH------------------------------------- 
    ! Depth types, DEPTH_TYPE=DATA: from depth file 
    !              DEPTH_TYPE=FLAT: idealized flat, need depth_flat 
    !              DEPTH_TYPE=SLOPE: idealized slope,  
    !                                 need slope,SLP starting point, Xslp 
    !                                 and depth_flat 
- DEPTH_TYPE = FLAT 
+ DEPTH_TYPE = SLOPE 
   ! if depth is flat and slope, specify flat_depth
 DEPTH_FLAT = 8.0
   if depth is slope, specify slope and starting point
@@ -25,20 +25,20 @@ Xslp = 300.0
    ! -------------------PRINT--------------------------------- 
    ! PRINT*, 
    ! result folder 
-RESULT_FOLDER = output/ 
+RESULT_FOLDER = /Users/fengyanshi/TMP/tmp4/
    ! ------------------DIMENSION----------------------------- 
    ! global grid dimension 
- Mglob = 500
- Nglob = 1 
+ Mglob = 250
+ Nglob = 100 
 
    ! ----------------- TIME---------------------------------- 
    ! time: total computational time/ plot time / screen interval  
    ! all in seconds 
  TOTAL_TIME = 200.0 
- PLOT_INTV = 1.0 
+ PLOT_INTV = 2.0 
  PLOT_INTV_STATION = 0.5 
- SCREEN_INTV = 1.0 
- StationOutputBuffer = 100
+ SCREEN_INTV = 2.0 
+
    ! -----------------GRID---------------------------------- 
    ! if use spherical grid, in decimal degrees 
  DX = 2.0 
@@ -58,19 +58,23 @@ RESULT_FOLDER = output/
    !                 and then use Wei and Kirby 1999  
    !          need input WaveCompFile (including 3 columns: per,amp,pha) 
    !          NumWaveComp,PeakPeriod,DEP_WK,Xc_WK,Ywidth_WK 
-WAVEMAKER = WK_REG
-DEP_WK = 8.0 
-Xc_WK = 150.0 
-Yc_WK = 0.0 
-Tperiod = 8.0 
-AMP_WK = 0.5 
-Theta_WK = 0.0 
-Delta_WK = 3.0
-  ! ---------------- TIDE BOUNDARY ----------------------
-TIDAL_BC_ABS = T
-TideBcType = CONSTANT
-TideWest_ETA = 1.0
-TideEast_ETA = 1.0
+WAVEMAKER = LEFT_BC_IRR
+WAVE_DATA_TYPE = DATA
+EqualEnergy = F
+DepthWaveMaker = 8.0
+WaveCompFile = wave_data.txt
+FreqPeak = 0.1
+FreqMin = 0.02
+FreqMax = 0.3
+Hmo = 1.0
+GammaTMA = 3.3
+ThetaPeak = 0.0
+Sigma_Theta = 10.0
+
+  ! ----------------- TIDE DATA
+TIDAL_BC_GEN_ABS = T
+TideDataFileName = tide_data.txt
+
   ! ---------------- PERIODIC BOUNDARY CONDITION --------- 
   ! South-North periodic boundary condition 
   ! 
@@ -80,8 +84,8 @@ PERIODIC = T
   ! need to specify widths of four boundaries and parameters if needed
   ! set width=0.0 if no sponge 
 DIFFUSION_SPONGE = F 
-FRICTION_SPONGE = T 
-DIRECT_SPONGE = T 
+FRICTION_SPONGE = F 
+DIRECT_SPONGE = F 
 Csp = 0.0 
 CDsponge = 1.0 
 Sponge_west_width =  0.0 
@@ -108,14 +112,14 @@ Cd = 0.0
   ! CFL 
 CFL = 0.5 
   ! Froude Number Cap (to avoid jumping drop, set 1.5) 
-FroudeCap = 1.0 
+FroudeCap = 10.0 
 
   ! --------------WET-DRY------------------------------- 
   ! MinDepth for wetting-drying 
 MinDepth=0.01 
 
   ! -------------- BREAKING ----------------------------
-VISCOSITY_BREAKING = T  
+VISCOSITY_BREAKING = F  
 Cbrk1 = 0.65 
 Cbrk2 = 0.35 
   ! ----------------- WAVE AVERAGE ------------------------ 
@@ -127,12 +131,12 @@ STEADY_TIME=100.0
   ! -----------------OUTPUT----------------------------- 
   ! stations  
   ! if NumberStations>0, need input i,j in STATION_FILE 
-NumberStations = 2
+NumberStations = 0
 STATIONS_FILE = gauges.txt 
   ! output variables, T=.TRUE, F = .FALSE. 
 DEPTH_OUT = T 
-U = T 
-V = T 
+U = F 
+V = F 
 ETA = T 
 Hmax = F 
 Hmin = F 

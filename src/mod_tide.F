@@ -66,7 +66,10 @@ MODULE TIDE_MODULE
   SAVE
 
   CHARACTER(LEN=80) TideBcType
-  LOGICAL :: TIDAL_BC=.FALSE.
+  CHARACTER(LEN=80) TideDataFileName
+  CHARACTER(LEN=80) tmp_name
+  LOGICAL :: TIDAL_BC_ABS=.FALSE.
+  LOGICAL :: TIDAL_BC_GEN_ABS=.FALSE.
   LOGICAL :: TideEast=.TRUE.
   LOGICAL :: TideWest=.TRUE.
   LOGICAL :: TideNorth=.TRUE.
@@ -77,13 +80,15 @@ MODULE TIDE_MODULE
   REAL(SP) :: TideSouth_U,TideSouth_V,TideSouth_ETA
   REAL(SP),DIMENSION(:,:),ALLOCATABLE :: SPONGE_TIDE_WEST, &
               SPONGE_TIDE_EAST,SPONGE_TIDE_SOUTH,SPONGE_TIDE_NORTH
-  INTEGER :: Iwidth
+  INTEGER :: Iwidth,Ifile
+  REAL(SP) :: Time_tide_1,Eta_tide_1,U_tide_1,V_tide_1, &
+              Time_tide_2,Eta_tide_2,U_tide_2,V_tide_2
   
 
 CONTAINS
   
 SUBROUTINE TIDE_INITIAL
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL,INPUT_FILE_NAME
+  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL,INPUT_FILE_NAME,WaveMaker
 # if defined (PARALLEL)
   USE GLOBAL,ONLY : iista,jjsta   
 # endif
@@ -99,30 +104,60 @@ SUBROUTINE TIDE_INITIAL
 ! read  from input.txt
       FILE_NAME=INPUT_FILE_NAME
 
-      CALL READ_LOGICAL(TIDAL_BC,FILE_NAME,'TIDAL_BC',ierr)
+ ! absorb only
+
+      CALL READ_LOGICAL(TIDAL_BC_ABS,FILE_NAME,'TIDAL_BC_ABS',ierr)
       IF(ierr == 1)THEN
-       TIDAL_BC = .FALSE. 
+       TIDAL_BC_ABS = .FALSE. 
 # if defined (PARALLEL) 
       if (myid.eq.0)then
-       WRITE(3,'(A80)')'TIDAL_BC not defined, Default: False'
-       WRITE(*,'(A80)')'TIDAL_BC not defined, Default: False'
+       WRITE(3,'(A80)')'TIDAL_BC_ABS not defined, Default: False'
+       WRITE(*,'(A80)')'TIDAL_BC_ABS not defined, Default: False'
       endif
 # else
-      WRITE(3,'(A80)')'TIDAL_BC not defined, Default: False'
-      WRITE(*,'(A80)')'TIDAL_BC not defined, Default: False'
+      WRITE(3,'(A80)')'TIDAL_BC_ABS not defined, Default: False'
+      WRITE(*,'(A80)')'TIDAL_BC_ABS not defined, Default: False'
 # endif 
       ENDIF
 
-    IF (TIDAL_BC) THEN
+ ! generating and absorbing
+
+      CALL READ_LOGICAL(TIDAL_BC_GEN_ABS,FILE_NAME,'TIDAL_BC_GEN_ABS',ierr)
+      IF(ierr == 1)THEN
+       TIDAL_BC_GEN_ABS = .FALSE. 
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
+       WRITE(*,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
+      endif
+# else
+      WRITE(3,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
+      WRITE(*,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
+# endif 
+      ELSE
+        IF(TIDAL_BC_GEN_ABS)THEN
+# if defined (PARALLEL) 
+        if (myid.eq.0)then
+         WRITE(3,'(A80)')'TIDAL_BC_GEN_ABS is TRUE'
+         WRITE(*,'(A80)')'TIDAL_BC_GEN_ABS is TRUE'
+        endif
+# else
+        WRITE(3,'(A80)')'TIDAL_BC_GEN_ABS is TRUE'
+        WRITE(*,'(A80)')'TIDAL_BC_GEN_ABS is TRUE'
+# endif 
+       ENDIF ! true
+      ENDIF
+
+    IF (TIDAL_BC_ABS) THEN
 
 # if defined (PARALLEL) 
       if (myid.eq.0)then
-       WRITE(3,'(A80)')'TIDAL_BC is defined'
-       WRITE(*,'(A80)')'TIDAL_BC is defined'
+       WRITE(3,'(A80)')'TIDAL_BC_ABS is defined'
+       WRITE(*,'(A80)')'TIDAL_BC_ABS is defined'
       endif
 # else
-      WRITE(3,'(A80)')'TIDAL_BC is defined'
-      WRITE(*,'(A80)')'TIDAL_BC is defined'
+      WRITE(3,'(A80)')'TIDAL_BC_ABS is defined'
+      WRITE(*,'(A80)')'TIDAL_BC_ABS is defined'
 # endif 
 
       ALLOCATE(SPONGE_TIDE_WEST(Mloc,Nloc),SPONGE_TIDE_EAST(Mloc,Nloc), &
@@ -342,12 +377,12 @@ SUBROUTINE TIDE_INITIAL
         Sponge_west_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You sed TideWest BC,  Sponge_west is invalid '
-         WRITE(3,'(A80)')'You sed TideWest BC,  Sponge_west is invalid '
+         WRITE(*,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
+         WRITE(3,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
       endif
 # else
-         WRITE(*,'(A80)')'You sed TideWest BC,  Sponge_west is invalid '
-         WRITE(3,'(A80)')'You sed TideWest BC,  Sponge_west is invalid '
+         WRITE(*,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
+         WRITE(3,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
 # endif         
       ENDIF
 
@@ -356,12 +391,12 @@ SUBROUTINE TIDE_INITIAL
         Sponge_east_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You sed TideEast BC,  Sponge_east is invalid '
-         WRITE(3,'(A80)')'You sed TideEast BC,  Sponge_east is invalid '
+         WRITE(*,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
+         WRITE(3,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
       endif
 # else
-         WRITE(*,'(A80)')'You sed TideEast BC,  Sponge_east is invalid '
-         WRITE(3,'(A80)')'You sed TideEast BC,  Sponge_east is invalid '
+         WRITE(*,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
+         WRITE(3,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
 # endif         
       ENDIF
 
@@ -370,12 +405,12 @@ SUBROUTINE TIDE_INITIAL
         Sponge_south_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You sed TideSouth BC,  Sponge_south is invalid '
-         WRITE(3,'(A80)')'You sed TideSouth BC,  Sponge_south is invalid '
+         WRITE(*,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
+         WRITE(3,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
       endif
 # else
-         WRITE(*,'(A80)')'You sed TideSouth BC,  Sponge_south is invalid '
-         WRITE(3,'(A80)')'You sed TideSouth BC,  Sponge_south is invalid '
+         WRITE(*,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
+         WRITE(3,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
 # endif         
       ENDIF
 
@@ -384,19 +419,19 @@ SUBROUTINE TIDE_INITIAL
         Sponge_North_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You sed TideNorth BC,  Sponge_North is invalid '
-         WRITE(3,'(A80)')'You sed TideNorth BC,  Sponge_North is invalid '
+         WRITE(*,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
+         WRITE(3,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
       endif
 # else
-         WRITE(*,'(A80)')'You sed TideNorth BC,  Sponge_North is invalid '
-         WRITE(3,'(A80)')'You sed TideNorth BC,  Sponge_North is invalid '
+         WRITE(*,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
+         WRITE(3,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
 # endif         
       ENDIF
 
 
       IF((.NOT.TideWest).AND.(.NOT.TideEast)  &
                         .AND.(.NOT.TideEast).AND.(.NOT.TideEast)) THEN
-        TIDAL_BC = .FALSE.
+        TIDAL_BC_ABS = .FALSE.
 
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
@@ -414,8 +449,108 @@ SUBROUTINE TIDE_INITIAL
 
     ENDIF ! end tide
 
+!  --------- absorbing generating bc
+
+     IF(TIDAL_BC_GEN_ABS)THEN
+
+       CALL READ_STRING(TideDataFileName,FILE_NAME,'TideDataFileName',ierr)
+       TMP_NAME = TRIM(TideDataFileName)
+
+        INQUIRE(FILE=TRIM(TMP_NAME),EXIST=FILE_EXIST)
+        IF(.NOT.FILE_EXIST)THEN
+# if defined (PARALLEL)
+        IF(MYID==0)  &
+         WRITE(*,*) TRIM(TMP_NAME), ' CANNOT BE FOUND. STOP'
+         CALL MPI_FINALIZE (ier)
+        STOP
+# else
+         WRITE(*,*) TRIM(TMP_NAME), ' CANNOT BE FOUND. STOP'
+         STOP
+# endif
+        ENDIF
+        Ifile = 100
+        OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
+        READ(Ifile,'(A80)')  tmp_name 
+        READ(Ifile,*) Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+
+        Time_tide_1 = Time_tide_2 
+        Eta_tide_1 = Eta_tide_2 
+        U_tide_1 = U_tide_2 
+        V_tide_1 = V_tide_2
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read tide ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+   ENDIF
+# else
+     WRITE(*,*)'Read tide ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+# endif
+
+     ENDIF ! end gen and abs
 
 END SUBROUTINE TIDE_INITIAL
+
+SUBROUTINE TIDE_DATA
+    USE GLOBAL,ONLY : tmp1,tmp2,SMALL,TIME,ZERO,DT
+        INTEGER :: Ifile
+        Ifile = 100
+
+        IF(TIME>Time_tide_1.AND.TIME>Time_tide_2) THEN
+
+        Time_tide_1 = Time_tide_2 
+        Eta_tide_1 = Eta_tide_2 
+        U_tide_1 = U_tide_2 
+        V_tide_1 = V_tide_2
+
+        DO WHILE (Time_tide_2.LT.TIME+DT)
+          READ(Ifile,*,END=120)  Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+        END DO
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read tide ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+   ENDIF
+# else
+     WRITE(*,*)'Read tide ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+# endif
+
+! interpolate
+    tmp2=ZERO
+    tmp1=ZERO
+
+    IF(TIME>Time_tide_1)THEN
+      IF(Time_tide_1.EQ.Time_tide_2)THEN
+        ! no more data
+        tmp2=ZERO
+        tmp1=ZERO
+      ELSE
+      tmp2=(Time_tide_2-TIME) &
+            /MAX(SMALL, ABS(Time_tide_2-Time_tide_1))
+      tmp1=1.0_SP - tmp2
+      ENDIF  ! no more data?
+    ENDIF ! time>time_1
+
+    TideWEST_U = U_tide_2*tmp1 +U_tide_1*tmp2
+    TideWEST_V = V_tide_2*tmp1 +V_tide_1*tmp2
+    TideWEST_ETA = ETA_tide_2*tmp1 +ETA_tide_1*tmp2
+
+        ENDIF ! time
+
+120 CONTINUE  ! no more data 
+
+END SUBROUTINE TIDE_DATA
 
 SUBROUTINE TIDE_SPONGE
   USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL

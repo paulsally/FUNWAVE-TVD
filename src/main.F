@@ -358,8 +358,12 @@ Program FUNWAVE_TVD
 ! etascreen was added, update_mask was moved here from outside RK 
        CALL UPDATE_MASK
 
-       IF(TIDAL_BC)THEN
+       IF(TIDAL_BC_ABS)THEN
          CALL TIDE_BC
+       ENDIF
+
+       IF(TIDAL_BC_GEN_ABS)THEN
+         CALL TIDE_DATA
        ENDIF
 
 # if defined (DEBUG)
