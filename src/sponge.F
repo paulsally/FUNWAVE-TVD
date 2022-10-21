@@ -130,13 +130,15 @@ SUBROUTINE ABSORBING_GENERATING_BC
             Vin2D(I,J)=Vin2D(I,J)+ TideWEST_V
            ENDIF
 
-            Eta(I,J) = Ein2D(I,J)+ (Eta(I,J)-Ein2D(I,J))/SpongeMaker(I,J)
+!            Eta(I,J) = Ein2D(I,J)+ (Eta(I,J)-Ein2D(I,J))/SpongeMaker(I,J)
+            Eta(I,J) = Ein2D(I,J)+ (Eta(I,J)-Ein2D(I,J))*SPONGE_TIDE_WEST(I,J)
             !U(I,J) = Uin2D(I,J)+(U(I,J)-Uin2D(I,J))/SpongeMaker(I,J)
             !V(I,J) = Vin2D(I,J)+(V(I,J)-Vin2D(I,J))/SpongeMaker(I,J)
             HU(I,J)=(Depth(I,J)+ETA(I,J))*U(I,J)
             HV(I,J)=(Depth(I,J)+ETA(I,J))*V(I,J)
         ENDDO
     ENDDO
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!END!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

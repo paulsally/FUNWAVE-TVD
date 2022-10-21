@@ -58,7 +58,7 @@ RESULT_FOLDER = /Users/fengyanshi/TMP/tmp4/
    !                 and then use Wei and Kirby 1999  
    !          need input WaveCompFile (including 3 columns: per,amp,pha) 
    !          NumWaveComp,PeakPeriod,DEP_WK,Xc_WK,Ywidth_WK 
-WAVEMAKER = LEFT_BC_IRR
+WAVEMAKER = ABSORBING_GENERATING
 WAVE_DATA_TYPE = DATA
 EqualEnergy = F
 DepthWaveMaker = 8.0
@@ -73,7 +73,8 @@ Sigma_Theta = 10.0
 
   ! ----------------- TIDE DATA
 TIDAL_BC_GEN_ABS = T
-TideDataFileName = tide_data.txt
+TideBcType = DATA
+TideWestFileName = tide_data_west.txt
 
   ! ---------------- PERIODIC BOUNDARY CONDITION --------- 
   ! South-North periodic boundary condition 

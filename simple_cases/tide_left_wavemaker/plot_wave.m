@@ -9,7 +9,7 @@ dy=2.0;
 x=[0:m-1]*dx;
 y=[0:n-1]*dy;
 
-nfile=[1:50];
+nfile=[1:2:99];
 
 
 
@@ -38,12 +38,12 @@ eta(mask==0)=NaN;
 subplot(1,2,1)
 
 mesh(x,y,eta)
-axis([0 x(end) 0 y(end) -2 2])
+axis([0 x(end) 0 y(end) -2 4])
 view(17,16)
 
 subplot(1,2,2)
 plot(x,eta(floor(n/2),:))
-axis([0 x(end) -2 2])
+axis([0 x(end) -2 4])
 grid
 
 if num==1

@@ -67,6 +67,7 @@ MODULE TIDE_MODULE
 
   CHARACTER(LEN=80) TideBcType
   CHARACTER(LEN=80) TideDataFileName
+  CHARACTER(LEN=80) TideWestFileName,TideEastFileName,TideNorthFileName,TideSouthFileName
   CHARACTER(LEN=80) tmp_name
   LOGICAL :: TIDAL_BC_ABS=.FALSE.
   LOGICAL :: TIDAL_BC_GEN_ABS=.FALSE.
@@ -81,9 +82,15 @@ MODULE TIDE_MODULE
   REAL(SP),DIMENSION(:,:),ALLOCATABLE :: SPONGE_TIDE_WEST, &
               SPONGE_TIDE_EAST,SPONGE_TIDE_SOUTH,SPONGE_TIDE_NORTH
   INTEGER :: Iwidth,Ifile
-  REAL(SP) :: Time_tide_1,Eta_tide_1,U_tide_1,V_tide_1, &
-              Time_tide_2,Eta_tide_2,U_tide_2,V_tide_2
-  
+  REAL(SP) :: Time_tide_west_1,Eta_tide_west_1,U_tide_west_1,V_tide_west_1, &
+              Time_tide_west_2,Eta_tide_west_2,U_tide_west_2,V_tide_west_2, &
+              Time_tide_east_1,Eta_tide_east_1,U_tide_east_1,V_tide_east_1, &
+              Time_tide_east_2,Eta_tide_east_2,U_tide_east_2,V_tide_east_2, &
+              Time_tide_south_1,Eta_tide_south_1,U_tide_south_1,V_tide_south_1, &
+              Time_tide_south_2,Eta_tide_south_2,U_tide_south_2,V_tide_south_2, &
+              Time_tide_north_1,Eta_tide_north_1,U_tide_north_1,V_tide_north_1, &
+              Time_tide_north_2,Eta_tide_north_2,U_tide_north_2,V_tide_north_2  
+
 
 CONTAINS
   
@@ -148,23 +155,6 @@ SUBROUTINE TIDE_INITIAL
        ENDIF ! true
       ENDIF
 
-    IF (TIDAL_BC_ABS) THEN
-
-# if defined (PARALLEL) 
-      if (myid.eq.0)then
-       WRITE(3,'(A80)')'TIDAL_BC_ABS is defined'
-       WRITE(*,'(A80)')'TIDAL_BC_ABS is defined'
-      endif
-# else
-      WRITE(3,'(A80)')'TIDAL_BC_ABS is defined'
-      WRITE(*,'(A80)')'TIDAL_BC_ABS is defined'
-# endif 
-
-      ALLOCATE(SPONGE_TIDE_WEST(Mloc,Nloc),SPONGE_TIDE_EAST(Mloc,Nloc), &
-                SPONGE_TIDE_SOUTH(Mloc,Nloc),SPONGE_TIDE_NORTH(Mloc,Nloc))
-
-      CALL TIDE_SPONGE
-
 ! input tide details
       CALL READ_STRING(TideBcType,FILE_NAME,'TideBcType',ierr)
       IF(ierr==1)THEN
@@ -181,6 +171,184 @@ SUBROUTINE TIDE_INITIAL
       ENDIF
 
     IF(TideBcType(1:4)=='CONS')THEN
+      CALL Tide_READ_CONSTANT
+    ENDIF
+
+    IF(TideBcType(1:4)=='DATA')THEN
+      CALL Tide_READ_DATA_INIT
+    ENDIF
+
+      ALLOCATE(SPONGE_TIDE_WEST(Mloc,Nloc),SPONGE_TIDE_EAST(Mloc,Nloc), &
+                SPONGE_TIDE_SOUTH(Mloc,Nloc),SPONGE_TIDE_NORTH(Mloc,Nloc))
+
+
+      CALL TIDE_SPONGE
+
+    IF (TIDAL_BC_ABS) THEN
+
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A80)')'TIDAL_BC_ABS is defined'
+       WRITE(*,'(A80)')'TIDAL_BC_ABS is defined'
+      endif
+# else
+      WRITE(3,'(A80)')'TIDAL_BC_ABS is defined'
+      WRITE(*,'(A80)')'TIDAL_BC_ABS is defined'
+# endif 
+
+
+      CALL REMOVE_SPONGE
+
+    ENDIF ! end tide abs
+
+END SUBROUTINE TIDE_INITIAL
+
+
+SUBROUTINE TIDE_SPONGE
+  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
+# if defined (PARALLEL)
+  USE GLOBAL,ONLY : iista,jjsta   
+# endif
+                    
+  IMPLICIT NONE
+  REAL(SP) :: ri,lim,Lstart,Lend,R_sp,A_sp
+  
+  Iwidth = 30
+  lim = 1.0_SP
+  R_sp = 0.85_SP
+  A_sp = 10.0_SP
+
+! west
+
+       do j = 1,Nloc
+       do i = 1,Mloc
+# if defined(PARALLEL)
+         ri = R_sp**(50*(i+npx*Mglob/px-1)/(Iwidth-1))
+# else
+         ri = R_sp**(50*(i-1)/(Iwidth-1))
+# endif
+         SPONGE_TIDE_WEST(i,j) = max(A_sp**ri,lim)
+       enddo
+       enddo
+
+! east
+       do j = 1,Nloc
+       do i = 1,Mloc
+# if defined(PARALLEL)
+         ri = R_sp**(50*(Mloc-i+(px-npx-1)*Mglob/px)/(Iwidth-1))
+# else
+         ri = R_sp**(50*(Mloc-i)/(Iwidth-1))
+# endif
+         SPONGE_TIDE_EAST(i,j) = max(A_sp**ri,lim)
+       enddo
+       enddo
+
+! south
+
+       do j = 1,Nloc
+       do i = 1,Mloc
+# if defined(PARALLEL)
+         ri = R_sp**(50*(j+npy*Nglob/py-1)/(Iwidth-1))
+# else
+         ri = R_sp**(50*(j-1)/(Iwidth-1))
+# endif
+         SPONGE_TIDE_SOUTH(i,j) = max(A_sp**ri,lim)
+       enddo
+       enddo
+
+! north
+       do j = 1,Nloc
+       do i = 1,Mloc
+# if defined(PARALLEL)
+         ri = R_sp**(50*(Nloc-j+(py-npy-1)*Nglob/py)/(Iwidth-1))
+# else
+         ri = R_sp**(50*(Nloc-i)/(Iwidth-1))
+# endif
+         SPONGE_TIDE_NORTH(i,j) = max(A_sp**ri,lim)
+       enddo
+       enddo
+
+       SPONGE_TIDE_WEST = 1.0_SP/SPONGE_TIDE_WEST
+       SPONGE_TIDE_EAST = 1.0_SP/SPONGE_TIDE_EAST
+       SPONGE_TIDE_SOUTH = 1.0_SP/SPONGE_TIDE_SOUTH
+       SPONGE_TIDE_NORTH = 1.0_SP/SPONGE_TIDE_NORTH
+
+
+
+END SUBROUTINE TIDE_SPONGE
+
+SUBROUTINE TIDE_BC
+  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
+# if defined (PARALLEL)
+  USE GLOBAL,ONLY : iista,jjsta   
+# endif
+                    
+  IMPLICIT NONE
+
+   IF(TideWest)THEN
+     DO J=1,Nloc
+     DO I=1,Iwidth
+       IF(MASK(I,J)==1)THEN
+         ETA(I,J)=TideWest_ETA +(ETA(I,J)-TideWest_ETA)*SPONGE_TIDE_WEST(I,J)
+         U(I,J)=TideWest_U +(U(I,J)-TideWest_U)*SPONGE_TIDE_WEST(I,J)
+         V(I,J)=TideWest_V +(V(I,J)-TideWest_V)*SPONGE_TIDE_WEST(I,J)
+       ENDIF
+     ENDDO
+     ENDDO
+   ENDIF
+
+   IF(TideEast)THEN
+     DO J=1,Nloc
+     DO I=Mloc-Iwidth+1,Mloc
+       IF(MASK(I,J)==1)THEN
+         ETA(I,J)=TideEast_ETA +(ETA(I,J)-TideEast_ETA)*SPONGE_TIDE_EAST(I,J)
+         U(I,J)=TideEast_U +(U(I,J)-TideEast_U)*SPONGE_TIDE_EAST(I,J)
+         V(I,J)=TideEast_V +(V(I,J)-TideEast_V)*SPONGE_TIDE_EAST(I,J)
+       ENDIF
+     ENDDO
+     ENDDO
+   ENDIF
+
+   IF(TideSouth)THEN
+     DO J=1,Iwidth
+     DO I=1,Mloc
+       IF(MASK(I,J)==1)THEN
+         ETA(I,J)=TideSouth_ETA +(ETA(I,J)-TideSouth_ETA)*SPONGE_TIDE_SOUTH(I,J)
+         U(I,J)=TideSouth_U +(U(I,J)-TideSouth_U)*SPONGE_TIDE_SOUTH(I,J)
+         V(I,J)=TideSouth_V +(V(I,J)-TideSouth_V)*SPONGE_TIDE_SOUTH(I,J)
+       ENDIF
+     ENDDO
+     ENDDO
+   ENDIF
+
+   IF(TideNorth)THEN
+     DO J=Nloc-Iwidth+1,Nloc
+     DO I=1,Mloc
+       IF(MASK(I,J)==1)THEN
+         ETA(I,J)=TideNorth_ETA +(ETA(I,J)-TideNorth_ETA)*SPONGE_TIDE_NORTH(I,J)
+         U(I,J)=TideNorth_U +(U(I,J)-TideNorth_U)*SPONGE_TIDE_NORTH(I,J)
+         V(I,J)=TideNorth_V +(V(I,J)-TideNorth_V)*SPONGE_TIDE_NORTH(I,J)
+       ENDIF
+     ENDDO
+     ENDDO
+   ENDIF
+
+END SUBROUTINE TIDE_BC
+
+SUBROUTINE Tide_READ_CONSTANT
+  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL,INPUT_FILE_NAME,WaveMaker
+# if defined (PARALLEL)
+  USE GLOBAL,ONLY : iista,jjsta   
+# endif
+                    
+  USE INPUT_READ
+  IMPLICIT NONE
+
+  CHARACTER(LEN=80)::FILE_NAME=' '
+  CHARACTER(LEN=80)::TMP_NAME=' '
+  INTEGER :: Ifile,ierr
+! read  from input.txt
+      FILE_NAME=INPUT_FILE_NAME
 
 !  west ---
 
@@ -372,6 +540,18 @@ SUBROUTINE TIDE_INITIAL
 # endif
       ENDIF
 
+
+END SUBROUTINE Tide_READ_CONSTANT
+
+
+SUBROUTINE REMOVE_SPONGE
+  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL,INPUT_FILE_NAME,WaveMaker
+# if defined (PARALLEL)
+  USE GLOBAL,ONLY : iista,jjsta   
+# endif
+ 
+  IMPLICIT NONE
+
       IF(TideWest)THEN
 
         Sponge_west_width = ZERO
@@ -444,245 +624,416 @@ SUBROUTINE TIDE_INITIAL
 # endif      
 
       ENDIF ! end all false
- 
-     ENDIF ! end tide constant
 
-    ENDIF ! end tide
+END SUBROUTINE REMOVE_SPONGE
 
-!  --------- absorbing generating bc
+SUBROUTINE Tide_READ_DATA_INIT
+  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL,INPUT_FILE_NAME,WaveMaker
+# if defined (PARALLEL)
+  USE GLOBAL,ONLY : iista,jjsta   
+# endif
+                    
+  USE INPUT_READ
+  IMPLICIT NONE
 
-     IF(TIDAL_BC_GEN_ABS)THEN
+  CHARACTER(LEN=80)::FILE_NAME=' '
+  CHARACTER(LEN=80)::TMP_NAME=' '
+  INTEGER :: Ifile,ierr
+! read  from input.txt
+      FILE_NAME=INPUT_FILE_NAME
 
-       CALL READ_STRING(TideDataFileName,FILE_NAME,'TideDataFileName',ierr)
-       TMP_NAME = TRIM(TideDataFileName)
+
+! west -----------
+       CALL READ_STRING(TideWestFileName,FILE_NAME,'TideWestFileName',ierr)
+       TMP_NAME = TRIM(TideWestFileName)
 
         INQUIRE(FILE=TRIM(TMP_NAME),EXIST=FILE_EXIST)
         IF(.NOT.FILE_EXIST)THEN
 # if defined (PARALLEL)
         IF(MYID==0)  &
-         WRITE(*,*) TRIM(TMP_NAME), ' CANNOT BE FOUND. STOP'
-         CALL MPI_FINALIZE (ier)
-        STOP
+         WRITE(*,*) TRIM(TMP_NAME), ' No west tidal bc'
 # else
-         WRITE(*,*) TRIM(TMP_NAME), ' CANNOT BE FOUND. STOP'
-         STOP
+         WRITE(*,*) TRIM(TMP_NAME), ' No west tidal bc'
 # endif
+        TideWest = .False.
         ENDIF
-        Ifile = 100
+      
+      IF(TideWest) THEN
+        Ifile = 101
         OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
         READ(Ifile,'(A80)')  tmp_name 
-        READ(Ifile,*) Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+        READ(Ifile,*) Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
 
-        Time_tide_1 = Time_tide_2 
-        Eta_tide_1 = Eta_tide_2 
-        U_tide_1 = U_tide_2 
-        V_tide_1 = V_tide_2
+        Time_tide_west_1 = Time_tide_west_2 
+        Eta_tide_west_1 = Eta_tide_west_2 
+        U_tide_west_1 = U_tide_west_2 
+        V_tide_west_1 = V_tide_west_2
 
 # if defined (PARALLEL)
    IF(MYID==0)THEN
-     WRITE(*,*)'Read tide ------'
-     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(*,*)'Read tide west ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
      WRITE(3,*)'Read tide ------'
-     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
    ENDIF
 # else
-     WRITE(*,*)'Read tide ------'
-     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(*,*)'Read tide west ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
      WRITE(3,*)'Read tide ------'
-     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
 # endif
 
-     ENDIF ! end gen and abs
+     ENDIF ! tidewest
 
-END SUBROUTINE TIDE_INITIAL
+
+! east -----------
+       CALL READ_STRING(TideEastFileName,FILE_NAME,'TideEastFileName',ierr)
+       TMP_NAME = TRIM(TideEastFileName)
+
+        INQUIRE(FILE=TRIM(TMP_NAME),EXIST=FILE_EXIST)
+        IF(.NOT.FILE_EXIST)THEN
+# if defined (PARALLEL)
+        IF(MYID==0)  &
+         WRITE(*,*) TRIM(TMP_NAME), ' No east tidal bc'
+# else
+         WRITE(*,*) TRIM(TMP_NAME), ' No east tidal bc'
+# endif
+        TideEast = .False.
+        ENDIF
+      
+      IF(TideEast) THEN
+        Ifile = 102
+        OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
+        READ(Ifile,'(A80)')  tmp_name 
+        READ(Ifile,*) Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+
+        Time_tide_east_1 = Time_tide_east_2 
+        Eta_tide_east_1 = Eta_tide_east_2 
+        U_tide_east_1 = U_tide_east_2 
+        V_tide_east_1 = V_tide_east_2
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read tide east ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+   ENDIF
+# else
+     WRITE(*,*)'Read tide east ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+# endif
+
+     ENDIF ! tideeast
+
+! south -----------
+       CALL READ_STRING(TideSouthFileName,FILE_NAME,'TideSouthFileName',ierr)
+       TMP_NAME = TRIM(TideSouthFileName)
+
+        INQUIRE(FILE=TRIM(TMP_NAME),EXIST=FILE_EXIST)
+        IF(.NOT.FILE_EXIST)THEN
+# if defined (PARALLEL)
+        IF(MYID==0)  &
+         WRITE(*,*) TRIM(TMP_NAME), ' No south tidal bc'
+# else
+         WRITE(*,*) TRIM(TMP_NAME), ' No south tidal bc'
+# endif
+        TideSouth = .False.
+        ENDIF
+      
+      IF(TideSouth) THEN
+        Ifile = 103
+        OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
+        READ(Ifile,'(A80)')  tmp_name 
+        READ(Ifile,*) Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+
+        Time_tide_south_1 = Time_tide_south_2 
+        Eta_tide_south_1 = Eta_tide_south_2 
+        U_tide_south_1 = U_tide_south_2 
+        V_tide_south_1 = V_tide_south_2
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read tide south ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+   ENDIF
+# else
+     WRITE(*,*)'Read tide south ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+# endif
+
+     ENDIF ! tidesouth
+
+! north -----------
+       CALL READ_STRING(TideNorthFileName,FILE_NAME,'TideNorthFileName',ierr)
+       TMP_NAME = TRIM(TideNorthFileName)
+
+        INQUIRE(FILE=TRIM(TMP_NAME),EXIST=FILE_EXIST)
+        IF(.NOT.FILE_EXIST)THEN
+# if defined (PARALLEL)
+        IF(MYID==0)  &
+         WRITE(*,*) TRIM(TMP_NAME), ' No north tidal bc'
+# else
+         WRITE(*,*) TRIM(TMP_NAME), ' No north tidal bc'
+# endif
+        TideNorth = .False.
+        ENDIF
+      
+      IF(TideNorth) THEN
+        Ifile = 104
+        OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
+        READ(Ifile,'(A80)')  tmp_name 
+        READ(Ifile,*) Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+
+        Time_tide_north_1 = Time_tide_north_2 
+        Eta_tide_north_1 = Eta_tide_north_2 
+        U_tide_north_1 = U_tide_north_2 
+        V_tide_north_1 = V_tide_north_2
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read tide north ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+   ENDIF
+# else
+     WRITE(*,*)'Read tide north ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+# endif
+
+     ENDIF ! tidenorth
+
+
+END SUBROUTINE Tide_READ_DATA_INIT
 
 SUBROUTINE TIDE_DATA
     USE GLOBAL,ONLY : tmp1,tmp2,SMALL,TIME,ZERO,DT
         INTEGER :: Ifile
-        Ifile = 100
 
-        IF(TIME>Time_tide_1.AND.TIME>Time_tide_2) THEN
 
-        Time_tide_1 = Time_tide_2 
-        Eta_tide_1 = Eta_tide_2 
-        U_tide_1 = U_tide_2 
-        V_tide_1 = V_tide_2
+! west ------------------
+      IF(TideWest) THEN
+        Ifile = 101  ! west
 
-        DO WHILE (Time_tide_2.LT.TIME+DT)
-          READ(Ifile,*,END=120)  Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+        IF(TIME>Time_tide_west_1.AND.TIME>Time_tide_west_2) THEN
+
+        Time_tide_west_1 = Time_tide_west_2 
+        Eta_tide_west_1 = Eta_tide_west_2 
+        U_tide_west_1 = U_tide_west_2 
+        V_tide_west_1 = V_tide_west_2
+
+        DO WHILE (Time_tide_west_2.LT.TIME+DT)
+          READ(Ifile,*,END=120)  Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
         END DO
 
 # if defined (PARALLEL)
    IF(MYID==0)THEN
-     WRITE(*,*)'Read tide ------'
-     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(*,*)'Read west ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
      WRITE(3,*)'Read tide ------'
-     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
    ENDIF
 # else
-     WRITE(*,*)'Read tide ------'
-     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(*,*)'Read west ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
      WRITE(3,*)'Read tide ------'
-     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_2, Eta_tide_2, U_tide_2, V_tide_2
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
 # endif
 
 ! interpolate
     tmp2=ZERO
     tmp1=ZERO
 
-    IF(TIME>Time_tide_1)THEN
-      IF(Time_tide_1.EQ.Time_tide_2)THEN
+    IF(TIME>Time_tide_west_1)THEN
+      IF(Time_tide_west_1.EQ.Time_tide_west_2)THEN
         ! no more data
         tmp2=ZERO
         tmp1=ZERO
       ELSE
-      tmp2=(Time_tide_2-TIME) &
-            /MAX(SMALL, ABS(Time_tide_2-Time_tide_1))
+      tmp2=(Time_tide_west_2-TIME) &
+            /MAX(SMALL, ABS(Time_tide_west_2-Time_tide_west_1))
       tmp1=1.0_SP - tmp2
       ENDIF  ! no more data?
     ENDIF ! time>time_1
 
-    TideWEST_U = U_tide_2*tmp1 +U_tide_1*tmp2
-    TideWEST_V = V_tide_2*tmp1 +V_tide_1*tmp2
-    TideWEST_ETA = ETA_tide_2*tmp1 +ETA_tide_1*tmp2
+    TideWEST_U = U_tide_west_2*tmp1 +U_tide_west_1*tmp2
+    TideWEST_V = V_tide_west_2*tmp1 +V_tide_west_1*tmp2
+    TideWEST_ETA = ETA_tide_west_2*tmp1 +ETA_tide_west_1*tmp2
 
         ENDIF ! time
+      ENDIF  ! west
+
+! east ------------------
+      IF(TideEast) THEN
+        Ifile = 102  ! east
+
+        IF(TIME>Time_tide_east_1.AND.TIME>Time_tide_east_2) THEN
+
+        Time_tide_east_1 = Time_tide_east_2 
+        Eta_tide_east_1 = Eta_tide_east_2 
+        U_tide_east_1 = U_tide_east_2 
+        V_tide_east_1 = V_tide_east_2
+
+        DO WHILE (Time_tide_east_2.LT.TIME+DT)
+          READ(Ifile,*,END=120)  Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+        END DO
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read east ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+   ENDIF
+# else
+     WRITE(*,*)'Read east ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
+# endif
+
+! interpolate
+    tmp2=ZERO
+    tmp1=ZERO
+
+    IF(TIME>Time_tide_east_1)THEN
+      IF(Time_tide_east_1.EQ.Time_tide_east_2)THEN
+        ! no more data
+        tmp2=ZERO
+        tmp1=ZERO
+      ELSE
+      tmp2=(Time_tide_east_2-TIME) &
+            /MAX(SMALL, ABS(Time_tide_east_2-Time_tide_east_1))
+      tmp1=1.0_SP - tmp2
+      ENDIF  ! no more data?
+    ENDIF ! time>time_1
+
+    TideEAST_U = U_tide_east_2*tmp1 +U_tide_east_1*tmp2
+    TideEAST_V = V_tide_east_2*tmp1 +V_tide_east_1*tmp2
+    TideEAST_ETA = ETA_tide_east_2*tmp1 +ETA_tide_east_1*tmp2
+
+        ENDIF ! time
+      ENDIF  ! east
+
+! south ------------------
+      IF(TideSouth) THEN
+        Ifile = 103  ! east
+
+        IF(TIME>Time_tide_south_1.AND.TIME>Time_tide_south_2) THEN
+
+        Time_tide_south_1 = Time_tide_south_2 
+        Eta_tide_south_1 = Eta_tide_south_2 
+        U_tide_south_1 = U_tide_south_2 
+        V_tide_south_1 = V_tide_south_2
+
+        DO WHILE (Time_tide_south_2.LT.TIME+DT)
+          READ(Ifile,*,END=120)  Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+        END DO
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read south ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+   ENDIF
+# else
+     WRITE(*,*)'Read south ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
+# endif
+
+! interpolate
+    tmp2=ZERO
+    tmp1=ZERO
+
+    IF(TIME>Time_tide_south_1)THEN
+      IF(Time_tide_south_1.EQ.Time_tide_south_2)THEN
+        ! no more data
+        tmp2=ZERO
+        tmp1=ZERO
+      ELSE
+      tmp2=(Time_tide_south_2-TIME) &
+            /MAX(SMALL, ABS(Time_tide_south_2-Time_tide_south_1))
+      tmp1=1.0_SP - tmp2
+      ENDIF  ! no more data?
+    ENDIF ! time>time_1
+
+    TideSOUTH_U = U_tide_south_2*tmp1 +U_tide_south_1*tmp2
+    TideSOUTH_V = V_tide_south_2*tmp1 +V_tide_south_1*tmp2
+    TideSOUTH_ETA = ETA_tide_south_2*tmp1 +ETA_tide_south_1*tmp2
+
+        ENDIF ! time
+      ENDIF  ! south
+
+! north ------------------
+      IF(TideNorth) THEN
+        Ifile = 104  ! north
+
+        IF(TIME>Time_tide_north_1.AND.TIME>Time_tide_north_2) THEN
+
+        Time_tide_north_1 = Time_tide_north_2 
+        Eta_tide_north_1 = Eta_tide_north_2 
+        U_tide_north_1 = U_tide_north_2 
+        V_tide_north_1 = V_tide_north_2
+
+        DO WHILE (Time_tide_north_2.LT.TIME+DT)
+          READ(Ifile,*,END=120)  Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+        END DO
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+     WRITE(*,*)'Read north ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+   ENDIF
+# else
+     WRITE(*,*)'Read north ------'
+     WRITE(*,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+     WRITE(3,*)'Read tide ------'
+     WRITE(3,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
+# endif
+
+! interpolate
+    tmp2=ZERO
+    tmp1=ZERO
+
+    IF(TIME>Time_tide_north_1)THEN
+      IF(Time_tide_north_1.EQ.Time_tide_north_2)THEN
+        ! no more data
+        tmp2=ZERO
+        tmp1=ZERO
+      ELSE
+      tmp2=(Time_tide_north_2-TIME) &
+            /MAX(SMALL, ABS(Time_tide_north_2-Time_tide_north_1))
+      tmp1=1.0_SP - tmp2
+      ENDIF  ! no more data?
+    ENDIF ! time>time_1
+
+    TideNORTH_U = U_tide_north_2*tmp1 +U_tide_north_1*tmp2
+    TideNORTH_V = V_tide_north_2*tmp1 +V_tide_north_1*tmp2
+    TideNORTH_ETA = ETA_tide_north_2*tmp1 +ETA_tide_north_1*tmp2
+
+        ENDIF ! time
+      ENDIF  ! north
+
 
 120 CONTINUE  ! no more data 
 
 END SUBROUTINE TIDE_DATA
 
-SUBROUTINE TIDE_SPONGE
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   
-# endif
-                    
-  IMPLICIT NONE
-  REAL(SP) :: ri,lim,Lstart,Lend,R_sp,A_sp
-  
-  Iwidth = 30
-  lim = 1.0_SP
-  R_sp = 0.85_SP
-  A_sp = 10.0_SP
-
-! west
-
-       do j = 1,Nloc
-       do i = 1,Mloc
-# if defined(PARALLEL)
-         ri = R_sp**(50*(i+npx*Mglob/px-1)/(Iwidth-1))
-# else
-         ri = R_sp**(50*(i-1)/(Iwidth-1))
-# endif
-         SPONGE_TIDE_WEST(i,j) = max(A_sp**ri,lim)
-       enddo
-       enddo
-
-! east
-       do j = 1,Nloc
-       do i = 1,Mloc
-# if defined(PARALLEL)
-         ri = R_sp**(50*(Mloc-i+(px-npx-1)*Mglob/px)/(Iwidth-1))
-# else
-         ri = R_sp**(50*(Mloc-i)/(Iwidth-1))
-# endif
-         SPONGE_TIDE_EAST(i,j) = max(A_sp**ri,lim)
-       enddo
-       enddo
-
-! south
-
-       do j = 1,Nloc
-       do i = 1,Mloc
-# if defined(PARALLEL)
-         ri = R_sp**(50*(j+npy*Nglob/py-1)/(Iwidth-1))
-# else
-         ri = R_sp**(50*(j-1)/(Iwidth-1))
-# endif
-         SPONGE_TIDE_SOUTH(i,j) = max(A_sp**ri,lim)
-       enddo
-       enddo
-
-! north
-       do j = 1,Nloc
-       do i = 1,Mloc
-# if defined(PARALLEL)
-         ri = R_sp**(50*(Nloc-j+(py-npy-1)*Nglob/py)/(Iwidth-1))
-# else
-         ri = R_sp**(50*(Nloc-i)/(Iwidth-1))
-# endif
-         SPONGE_TIDE_NORTH(i,j) = max(A_sp**ri,lim)
-       enddo
-       enddo
-
-       SPONGE_TIDE_WEST = 1.0_SP/SPONGE_TIDE_WEST
-       SPONGE_TIDE_EAST = 1.0_SP/SPONGE_TIDE_EAST
-       SPONGE_TIDE_SOUTH = 1.0_SP/SPONGE_TIDE_SOUTH
-       SPONGE_TIDE_NORTH = 1.0_SP/SPONGE_TIDE_NORTH
-
-
-
-END SUBROUTINE TIDE_SPONGE
-
-SUBROUTINE TIDE_BC
-  USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,itmp5,SMALL
-# if defined (PARALLEL)
-  USE GLOBAL,ONLY : iista,jjsta   
-# endif
-                    
-  IMPLICIT NONE
-
-   IF(TideWest)THEN
-     DO J=1,Nloc
-     DO I=1,Iwidth
-       IF(MASK(I,J)==1)THEN
-         ETA(I,J)=TideWest_ETA +(ETA(I,J)-TideWest_ETA)*SPONGE_TIDE_WEST(I,J)
-         U(I,J)=TideWest_U +(U(I,J)-TideWest_U)*SPONGE_TIDE_WEST(I,J)
-         V(I,J)=TideWest_V +(V(I,J)-TideWest_V)*SPONGE_TIDE_WEST(I,J)
-       ENDIF
-     ENDDO
-     ENDDO
-   ENDIF
-
-   IF(TideEast)THEN
-     DO J=1,Nloc
-     DO I=Mloc-Iwidth+1,Mloc
-       IF(MASK(I,J)==1)THEN
-         ETA(I,J)=TideEast_ETA +(ETA(I,J)-TideEast_ETA)*SPONGE_TIDE_EAST(I,J)
-         U(I,J)=TideEast_U +(U(I,J)-TideEast_U)*SPONGE_TIDE_EAST(I,J)
-         V(I,J)=TideEast_V +(V(I,J)-TideEast_V)*SPONGE_TIDE_EAST(I,J)
-       ENDIF
-     ENDDO
-     ENDDO
-   ENDIF
-
-   IF(TideSouth)THEN
-     DO J=1,Iwidth
-     DO I=1,Mloc
-       IF(MASK(I,J)==1)THEN
-         ETA(I,J)=TideSouth_ETA +(ETA(I,J)-TideSouth_ETA)*SPONGE_TIDE_SOUTH(I,J)
-         U(I,J)=TideSouth_U +(U(I,J)-TideSouth_U)*SPONGE_TIDE_SOUTH(I,J)
-         V(I,J)=TideSouth_V +(V(I,J)-TideSouth_V)*SPONGE_TIDE_SOUTH(I,J)
-       ENDIF
-     ENDDO
-     ENDDO
-   ENDIF
-
-   IF(TideNorth)THEN
-     DO J=Nloc-Iwidth+1,Nloc
-     DO I=1,Mloc
-       IF(MASK(I,J)==1)THEN
-         ETA(I,J)=TideNorth_ETA +(ETA(I,J)-TideNorth_ETA)*SPONGE_TIDE_NORTH(I,J)
-         U(I,J)=TideNorth_U +(U(I,J)-TideNorth_U)*SPONGE_TIDE_NORTH(I,J)
-         V(I,J)=TideNorth_V +(V(I,J)-TideNorth_V)*SPONGE_TIDE_NORTH(I,J)
-       ENDIF
-     ENDDO
-     ENDDO
-   ENDIF
-
-END SUBROUTINE TIDE_BC
-
+ 
 END MODULE TIDE_MODULE
 
 
