@@ -318,6 +318,10 @@ Program FUNWAVE_TVD
 #    endif
 # endif
 
+       IF(TideBcType(1:4)=='DATA')THEN
+         CALL TIDE_DATA
+       ENDIF
+
      ! 3-ORDER RUNGE-KUTTA TIME STEPPING
      DO ISTAGE=1,3
 
@@ -360,10 +364,6 @@ Program FUNWAVE_TVD
 
        IF(TIDAL_BC_ABS)THEN
          CALL TIDE_BC
-       ENDIF
-
-       IF(TIDAL_BC_GEN_ABS)THEN
-         CALL TIDE_DATA
        ENDIF
 
 # if defined (DEBUG)

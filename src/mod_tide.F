@@ -132,15 +132,6 @@ SUBROUTINE TIDE_INITIAL
       CALL READ_LOGICAL(TIDAL_BC_GEN_ABS,FILE_NAME,'TIDAL_BC_GEN_ABS',ierr)
       IF(ierr == 1)THEN
        TIDAL_BC_GEN_ABS = .FALSE. 
-# if defined (PARALLEL) 
-      if (myid.eq.0)then
-       WRITE(3,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
-       WRITE(*,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
-      endif
-# else
-      WRITE(3,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
-      WRITE(*,'(A80)')'TIDAL_BC_GEN_ABS not defined, Default: False'
-# endif 
       ELSE
         IF(TIDAL_BC_GEN_ABS)THEN
 # if defined (PARALLEL) 
@@ -171,10 +162,32 @@ SUBROUTINE TIDE_INITIAL
       ENDIF
 
     IF(TideBcType(1:4)=='CONS')THEN
+
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A50)')'You use CONSTANT TIDAL BC -----------------------'
+         WRITE(3,'(A50)')'You use CONSTANT TIDAL BC -----------------------'
+      endif
+# else
+         WRITE(*,'(A50)')'You use CONSTANT TIDAL BC -----------------------'
+         WRITE(3,'(A50)')'You use CONSTANT TIDAL BC -----------------------'
+# endif
+
       CALL Tide_READ_CONSTANT
     ENDIF
 
     IF(TideBcType(1:4)=='DATA')THEN
+
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A50)')'You use TIDAL BC DATA ---------------------------'
+         WRITE(3,'(A50)')'You use TIDAL BC DATA ---------------------------'
+      endif
+# else
+         WRITE(*,'(A50)')'You use TIDAL BC DATA ---------------------------'
+         WRITE(3,'(A50)')'You use TIDAL BC DATA ---------------------------'
+# endif
+
       CALL Tide_READ_DATA_INIT
     ENDIF
 
@@ -557,12 +570,12 @@ SUBROUTINE REMOVE_SPONGE
         Sponge_west_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
-         WRITE(3,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
+         WRITE(*,'(A80)')'You set TideWest BC,  Sponge_west is removed '
+         WRITE(3,'(A80)')'You set TideWest BC,  Sponge_west is removed '
       endif
 # else
-         WRITE(*,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
-         WRITE(3,'(A80)')'You set TideWest BC,  Sponge_west is invalid '
+         WRITE(*,'(A80)')'You set TideWest BC,  Sponge_west is removed '
+         WRITE(3,'(A80)')'You set TideWest BC,  Sponge_west is removed '
 # endif         
       ENDIF
 
@@ -571,12 +584,12 @@ SUBROUTINE REMOVE_SPONGE
         Sponge_east_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
-         WRITE(3,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
+         WRITE(*,'(A80)')'You set TideEast BC,  Sponge_east is removed '
+         WRITE(3,'(A80)')'You set TideEast BC,  Sponge_east is removed '
       endif
 # else
-         WRITE(*,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
-         WRITE(3,'(A80)')'You set TideEast BC,  Sponge_east is invalid '
+         WRITE(*,'(A80)')'You set TideEast BC,  Sponge_east is removed '
+         WRITE(3,'(A80)')'You set TideEast BC,  Sponge_east is removed '
 # endif         
       ENDIF
 
@@ -585,12 +598,12 @@ SUBROUTINE REMOVE_SPONGE
         Sponge_south_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
-         WRITE(3,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
+         WRITE(*,'(A80)')'You set TideSouth BC,  Sponge_south is removed '
+         WRITE(3,'(A80)')'You set TideSouth BC,  Sponge_south is removed '
       endif
 # else
-         WRITE(*,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
-         WRITE(3,'(A80)')'You set TideSouth BC,  Sponge_south is invalid '
+         WRITE(*,'(A80)')'You set TideSouth BC,  Sponge_south is removed '
+         WRITE(3,'(A80)')'You set TideSouth BC,  Sponge_south is removed '
 # endif         
       ENDIF
 
@@ -599,12 +612,12 @@ SUBROUTINE REMOVE_SPONGE
         Sponge_North_width = ZERO
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
-         WRITE(3,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
+         WRITE(*,'(A80)')'You set TideNorth BC,  Sponge_North is removed '
+         WRITE(3,'(A80)')'You set TideNorth BC,  Sponge_North is removed '
       endif
 # else
-         WRITE(*,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
-         WRITE(3,'(A80)')'You set TideNorth BC,  Sponge_North is invalid '
+         WRITE(*,'(A80)')'You set TideNorth BC,  Sponge_North is removed '
+         WRITE(3,'(A80)')'You set TideNorth BC,  Sponge_North is removed '
 # endif         
       ENDIF
 
@@ -849,6 +862,8 @@ SUBROUTINE TIDE_DATA
      WRITE(3,*)'Time,Eta,U,V = ', Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
 # endif
 
+     ENDIF ! end read time
+
 ! interpolate
     tmp2=ZERO
     tmp1=ZERO
@@ -865,11 +880,11 @@ SUBROUTINE TIDE_DATA
       ENDIF  ! no more data?
     ENDIF ! time>time_1
 
+
     TideWEST_U = U_tide_west_2*tmp1 +U_tide_west_1*tmp2
     TideWEST_V = V_tide_west_2*tmp1 +V_tide_west_1*tmp2
     TideWEST_ETA = ETA_tide_west_2*tmp1 +ETA_tide_west_1*tmp2
 
-        ENDIF ! time
       ENDIF  ! west
 
 ! east ------------------
@@ -901,6 +916,8 @@ SUBROUTINE TIDE_DATA
      WRITE(3,*)'Time,Eta,U,V = ', Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
 # endif
 
+     ENDIF ! end read time
+
 ! interpolate
     tmp2=ZERO
     tmp1=ZERO
@@ -921,7 +938,6 @@ SUBROUTINE TIDE_DATA
     TideEAST_V = V_tide_east_2*tmp1 +V_tide_east_1*tmp2
     TideEAST_ETA = ETA_tide_east_2*tmp1 +ETA_tide_east_1*tmp2
 
-        ENDIF ! time
       ENDIF  ! east
 
 ! south ------------------
@@ -953,6 +969,8 @@ SUBROUTINE TIDE_DATA
      WRITE(3,*)'Time,Eta,U,V = ', Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
 # endif
 
+     ENDIF ! end read time
+
 ! interpolate
     tmp2=ZERO
     tmp1=ZERO
@@ -973,7 +991,6 @@ SUBROUTINE TIDE_DATA
     TideSOUTH_V = V_tide_south_2*tmp1 +V_tide_south_1*tmp2
     TideSOUTH_ETA = ETA_tide_south_2*tmp1 +ETA_tide_south_1*tmp2
 
-        ENDIF ! time
       ENDIF  ! south
 
 ! north ------------------
@@ -1005,6 +1022,8 @@ SUBROUTINE TIDE_DATA
      WRITE(3,*)'Time,Eta,U,V = ', Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
 # endif
 
+     ENDIF ! end read time
+
 ! interpolate
     tmp2=ZERO
     tmp1=ZERO
@@ -1025,7 +1044,6 @@ SUBROUTINE TIDE_DATA
     TideNORTH_V = V_tide_north_2*tmp1 +V_tide_north_1*tmp2
     TideNORTH_ETA = ETA_tide_north_2*tmp1 +ETA_tide_north_1*tmp2
 
-        ENDIF ! time
       ENDIF  ! north
 
 
