@@ -264,6 +264,9 @@ SUBROUTINE INITIALIZATION
      USE GLOBAL
      USE INPUT_READ
      USE BATHY_CORRECTION_MODULE
+# if defined (SUBGRID)
+     USE SUBGRID_MODULE
+# endif
 # if defined(INTEL)
      USE IFPORT
 # endif
@@ -753,6 +756,11 @@ SUBROUTINE INITIALIZATION
     ENDDO
   ENDIF
 # endif
+
+# if defined (SUBGRID)
+  CALL SUBGRID_INITIAL
+# endif
+! end subgrid
 
 ! depth at ghost cells and re-construct depth at x,y-interfaces
 ! use mirror instead of continuous used before, date: 02/24/2019

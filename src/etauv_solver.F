@@ -55,6 +55,9 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 # if defined (VESSEL)
      USE VESSEL_MODULE
 # endif
+# if defined (SUBGRID)
+     USE SUBGRID_MODULE
+# endif
      IMPLICIT NONE
      INTEGER,INTENT(IN)::ISTEP
      REAL(SP),PARAMETER::n_left=-1.0_SP,n_right=1.0_SP,n_bottom=-1.0_SP,n_top=1.0_SP
@@ -236,6 +239,14 @@ SUBROUTINE ESTIMATE_HUV(ISTEP)
 ! evaluate vertical velocity at surface O(mu^2), fyshi 07/07/2022
      Wsurf(I,J) = R1(I,J)
 
+# if defined (SUBGRID)     
+     IF(Porosity(I,J).ne.ZERO)THEN
+       R1(I,J)=R1(I,J)/Porosity(I,J)
+     ELSE
+       write(*,*) 'porosity(',I,J,') = 0 ... check model setting!'  
+     ENDIF
+# endif
+
 # if defined (ITERATION)
       Eta(I,J)=ALPHA(ISTEP)*Eta0(I,J)+BETA(ISTEP)*(EtaOld(I,J)+DT*R1(I,J))
 # else
@@ -338,6 +349,20 @@ SUBROUTINE GET_Eta_U_V_HU_HV
 
 ! calculate etar, u and vetar, HU, HV
      H=Eta*Gamma3+Depth
+
+# if defined (SUBGRID)
+
+     CALL UPDATE_SUBGRID
+
+     DO J=1,Nloc
+     DO I=1,Mloc
+     IF(MaskSubgrid(I,J) .eq. 1)THEN
+     H(I,J)=DepAvgSubgrid(I,J)
+     ENDIF ! end subgrid mask
+     ENDDO
+     ENDDO
+
+# endif
 
 
 !   tridiagonal coefficient
