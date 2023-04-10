@@ -1,5 +1,5 @@
 #-----------BEGIN MAKEFILE---------------------------
-FUNWAVE_DIR = .
+FUNWAVE_DIR = ../..
 WORK_DIR    = funwave-work
 COMPILER    = gnu
 PARALLEL    = true
@@ -33,7 +33,7 @@ MDEPFLAGS   = --cpp --fext=f90 --file=-
 RANLIB      = ranlib
 
 #----------include the essential makefiles------------
-include $(FUNWAVE_DIR)/GNUMake/Essential/Make_Essential
+include $(FUNWAVE_DIR)/GNUMake/Essential/Make_Essential_gcc10
 
 ##-----------------------------------------------------
 ##      Instructions for Makefile

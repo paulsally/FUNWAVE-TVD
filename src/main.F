@@ -141,6 +141,10 @@ Program FUNWAVE_TVD
      USE SEDIMENT_MODULE
 # endif
 
+# if defined (FOAM)
+     USE MOD_FOAM
+# endif
+
 # if defined (METEO)
      USE METEO_MODULE
 # endif
@@ -228,6 +232,11 @@ Program FUNWAVE_TVD
 
 # if defined (SEDIMENT)
      CALL SEDIMENT_INITIAL
+# endif
+
+# if defined (FOAM)
+     CALL ALLOCATE_FOAM
+     CALL INITIALIZATION_FOAM
 # endif
 
 #if defined (TRACKING)

@@ -63,6 +63,9 @@ SUBROUTINE OUTPUT
 # if defined (TRACKING)
      USE TRACER
 # endif
+# if defined(FOAM)
+     USE MOD_FOAM
+# endif
 
     IMPLICIT NONE
 
@@ -116,6 +119,14 @@ SUBROUTINE OUTPUT
        CALL OUTPUT_TRACKING
       ENDIF      
 # endif
+# if defined (FOAM)
+      PLOT_COUNT_FOAM=PLOT_COUNT_FOAM+DT
+      IF(PLOT_COUNT_FOAM>=PLOT_INTV_FOAM)THEN
+       PLOT_COUNT_FOAM=PLOT_COUNT_FOAM-PLOT_INTV_FOAM
+       CALL OUTPUT_FOAM
+      ENDIF      
+# endif
+
 
    ENDIF ! end plot start time
 
@@ -4200,6 +4211,10 @@ SUBROUTINE PREVIEW
 # if defined(SEDIMENT)
      USE SEDIMENT_MODULE
 # endif
+# if defined(FOAM)
+     USE MOD_FOAM
+# endif
+
 
      IMPLICIT NONE
 
@@ -4420,6 +4435,13 @@ SUBROUTINE PREVIEW
 
 # endif
 ! end sediment
+
+! foam
+# if defined (FOAM)
+        TMP_NAME = TRIM(FDIR)//'FoamEta_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,EtaFoam)
+# endif
+! end foam
 
      IF(OUT_TMP)THEN
         TMP_NAME = TRIM(FDIR)//'tmp_'//TRIM(FILE_NAME)
@@ -4825,5 +4847,45 @@ END SUBROUTINE OUTPUT_SEDIMENT
 
 # endif
 ! end sediment
+
+! ----------
+# if defined (FOAM)
+!-------------------------------------------------------------------------------------
+!
+!    OUTPUT_FOAM is a subroutine to write foam data
+!
+!
+!-------------------------------------------------------------------------------------
+SUBROUTINE OUTPUT_FOAM
+     USE GLOBAL
+     USE INPUT_READ
+# if defined (VESSEL)
+     USE VESSEL_MODULE
+# endif
+     IMPLICIT NONE
+     CHARACTER(LEN=80)::FDIR=' '
+     LOGICAL :: FirstCallFoam = .TRUE.
+     SAVE FirstCallFoam
+
+# if defined (PARALLEL)
+     IF(myid.eq.0)THEN
+# endif
+
+! initialize stations
+     if (FirstCallFoam) then
+       FDIR=TRIM(RESULT_FOLDER)
+       FirstCallFoam = .FALSE.
+     endif
+
+! time series here
+
+# if defined (PARALLEL)
+      ENDIF
+# endif
+
+END SUBROUTINE OUTPUT_FOAM
+
+# endif
+! end foam
 
 
