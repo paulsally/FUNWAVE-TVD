@@ -110,8 +110,8 @@ FroudeCap = 1.0
 MinDepth=0.01 
 
   ! -------------- BREAKING ----------------------------
-VISCOSITY_BREAKING = F  
-Cbrk1 = 0.65 
+VISCOSITY_BREAKING = T
+Cbrk1 = 0.45 
 Cbrk2 = 0.35 
   ! ----------------- WAVE AVERAGE ------------------------ 
   ! if use smagorinsky mixing, have to set -DMIXING in Makefile 
@@ -137,7 +137,7 @@ VORmax = F
 Umean = T 
 Vmean = T 
 ETAmean = T 
-MASK = T 
+MASK = F 
 MASK9 = F 
 SXL = F 
 SXR = F 
@@ -151,6 +151,6 @@ Fx = F
 Fy = F 
 Gx = F 
 Gy = F 
-AGE = F 
+AGE = T 
 TMP = F 
 WaveHeight = T 

@@ -396,6 +396,12 @@ Program FUNWAVE_TVD
        WRITE(*,*) 'WAVE_BREAKING'
 #    endif
 # endif
+
+# if defined (FOAM)
+       CALL FOAM_FLUX
+       CALL FOAM_UPDATE
+       CALL FOAM_BC
+# endif
        
        CALL EXCHANGE
 

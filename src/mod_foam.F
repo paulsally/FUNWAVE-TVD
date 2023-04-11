@@ -1,7 +1,7 @@
 # if defined (FOAM)
 Module MOD_FOAM
      USE GLOBAL, ONLY : SP,ZERO,Mloc,Mloc1,Nloc,Nloc1,DX,DY,DT,Nghost,pi,TIME, &
-                        PLOT_INTV
+                        PLOT_INTV, U,V,AGE_breaking,Ibeg,Iend,Jbeg,Jend
                         
 # if defined (PARALLEL)
      USE GLOBAL, ONLY : n_west,n_east,n_suth,n_nrth,MPI_PROC_NULL
@@ -83,7 +83,7 @@ SUBROUTINE INITIALIZATION_FOAM
      EtaFoam=ZERO
      UFoam=ZERO
      VFoam=ZERO
-     MaskFoam=0
+     MaskFoam=1
      MxFoam=ZERO
      MyFoam=ZERO
      FxFoam=ZERO
@@ -109,13 +109,27 @@ SUBROUTINE FOAM_UPDATE
      REAL(SP) :: Uabs,Uadd,Vadd
      INTEGER :: I,J,K
 
+! sources
+     Usurf=U
+     Vsurf=V
+     VFsurf=AGE_breaking
+
+        DO J=1,Nloc
+         DO I=1,Mloc
+          IF(VFsurf(I,J)<0.1)VFsurf(I,J)=1000.0_SP
+          VFsurf(I,J)=0.4_SP*EXP(-VFsurf(I,J))
+          SinkM(I,J)=EtaFoam(I,J)*BurstRate
+          SourceM(I,J)=VFsurf(I,J)*TransferRate*MaskFoam(I,J)
+         ENDDO
+        ENDDO
+
 ! EtaFoam
 
-     DO J=1+Nghost,Nloc-2*Nghost
-     DO I=1+Nghost,Mloc-2*Nghost
+!     DO J=1+Nghost,Nloc-2*Nghost
+!    DO I=1+Nghost,Mloc-2*Nghost
 
-       SinkM(I,J)=EtaFoam(I,J)*BurstRate
-       SourceM(I,J)=VFsurf(I,J)*TransferRate*MaskFoam(I,J)
+      DO J=Jbeg,Jend
+      DO I=Ibeg,Iend
 
 # if defined(CARTESIAN)
        EtaFoam(I,J)=EtaFoam(I,J)-DT*(MxFoam(I+1,J)-MxFoam(I,J))/DX &
@@ -136,8 +150,11 @@ SUBROUTINE FOAM_UPDATE
 
 
 ! UFoam,VFoam
-     DO J=1+Nghost,Nloc-2*Nghost
-     DO I=1+Nghost,Mloc-2*Nghost
+!     DO J=1+Nghost,Nloc-2*Nghost
+!     DO I=1+Nghost,Mloc-2*Nghost
+
+      DO J=Jbeg,Jend
+      DO I=Ibeg,Iend
 
        IF(EtaFoam(I,J)>ZERO)THEN
          Uabs=SQRT((Usurf(I,J)-UFoam(I,J))**2+(Vsurf(I,J)-VFoam(I,J))**2)
@@ -284,7 +301,7 @@ SUBROUTINE FOAM_FLUX
 
 END SUBROUTINE FOAM_FLUX
 
-SUBROUTINE UPDATE_FOAM_MASK
+SUBROUTINE UPDATE_FOAM_MASK ! useless so far
      IMPLICIT NONE
      REAL(SP)::left,right,top,bottom
      INTEGER :: I,J,K
