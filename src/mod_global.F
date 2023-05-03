@@ -293,7 +293,8 @@ MODULE GLOBAL
                   DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH, &
                   P_center,Q_center,U_davg,V_davg,U_davg_sum,V_davg_sum, &
                   U_davg_mean,V_davg_mean,P_sum,Q_sum, &
-                  P_mean,Q_mean
+                  P_mean,Q_mean, &
+                  BreakDissX,BreakDissY,BreakDissX_sum,BreakDissY_sum
       REAL(SP)::T_INTV_mean = 20.0,T_sum=0.0,C_smg=0.25
       REAL(SP),DIMENSION(:,:),ALLOCATABLE :: &
                 WaveHeightRMS,WaveHeightAve,Emax,Emin,& 
@@ -367,8 +368,12 @@ MODULE GLOBAL
        LOGICAL :: OUT_Umean=.FALSE.,OUT_Vmean=.FALSE.,&
                   OUT_ETAmean=.FALSE.,&
                   OUT_WaveHeight = .FALSE.,&
-	          OUT_WaveHeightSig = .FALSE., &   
-	          OUT_Radiation = .FALSE.
+                  OUT_WaveHeightSig = .FALSE., &   
+                  OUT_Radiation = .FALSE., &
+                  OUT_FrcX = .FALSE., &
+                  OUT_FrcY = .FALSE., &
+                  OUT_BrkdisX = .FALSE., &
+                  OUT_BrkdisY = .FALSE.
 
 
 !# if defined (CARTESIAN)
@@ -404,6 +409,8 @@ MODULE GLOBAL
 ! eddy viscosity breaking
         REAL(SP),DIMENSION(:,:),ALLOCATABLE :: AGE_BREAKING
         REAL(SP),DIMENSION(:,:),ALLOCATABLE :: ROLLER_FLUX,UNDERTOW_U,UNDERTOW_V
+        REAL(SP),DIMENSION(:,:),ALLOCATABLE :: BreakSourceX,BreakSourceY
+        REAL(SP),DIMENSION(:,:),ALLOCATABLE :: FrcInsX,FrcInsY
         REAL(SP) :: Cbrk1=0.65,Cbrk2=0.35,T_brk
         ! use T_brk to judge breakers
         LOGICAL :: INI_UVZ=.FALSE.

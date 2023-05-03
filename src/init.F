@@ -108,6 +108,8 @@ SUBROUTINE ALLOCATE_VARIABLES
               WWsum(Mloc,Nloc),WWmean(Mloc,Nloc),&
               FRCXsum(Mloc,Nloc),FRCXmean(Mloc,Nloc),&
               FRCYsum(Mloc,Nloc),FRCYmean(Mloc,Nloc),&
+              BreakDissX(Mloc,Nloc),BreakDissY(Mloc,Nloc), &
+              BreakDissX_sum(Mloc,Nloc),BreakDissY_sum(Mloc,Nloc), &
               Wsurf(Mloc,Nloc), &
               DxSxx(Mloc,Nloc),DySxy(Mloc,Nloc), &
               DySyy(Mloc,Nloc),DxSxy(Mloc,Nloc), &
@@ -198,7 +200,10 @@ SUBROUTINE ALLOCATE_VARIABLES
        ALLOCATE(AGE_BREAKING(Mloc,Nloc))
        ALLOCATE(nu_break(Mloc,Nloc))
        nu_break=nu_bkg
+       ALLOCATE(BreakSourceX(Mloc,Nloc),BreakSourceY(Mloc,Nloc))
       ENDIF
+
+      ALLOCATE(FrcInsX(Mloc,Nloc),FrcInsY(Mloc,Nloc))
 	
       ALLOCATE(ROLLER_FLUX(Mloc,Nloc),UNDERTOW_U(Mloc,Nloc),UNDERTOW_V(Mloc,Nloc))
 
@@ -392,6 +397,8 @@ SUBROUTINE INITIALIZATION
      FRCXmean = ZERO
      FRCYsum = ZERO
      FRCYmean = ZERO
+     BreakDissX_sum = ZERO
+     BreakDissY_sum = ZERO
      Wsurf = ZERO
      DxSxx = ZERO
      DySxy = ZERO

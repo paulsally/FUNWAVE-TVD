@@ -227,16 +227,20 @@ ENDIF
 # if defined (CARTESIAN)
 
 ! second order, move the second term to left-hand side
-       SourceX(I,J)=GRAV*(Eta(I,J))/DX*(Depthx(I+1,J)-Depthx(I,J))*MASK(I,J) &
- ! friction
+
+       FrcInsX(I,J) = &
 # if defined (MANNING)
                    -(GRAV*Cd(I,J)**2/  &
                    Max(H(I,J),MinDepthFrc)**(0.333333_SP))  &
                    *U(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J)) &
 # else
-                   -Cd(I,J)*U(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J)) &
+                   -Cd(I,J)*U(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J))
 # endif
 
+
+       SourceX(I,J)=GRAV*(Eta(I,J))/DX*(Depthx(I+1,J)-Depthx(I,J))*MASK(I,J) &
+                       ! friction
+                   + FrcInsX(I,J) &
                        ! dispersion
                        ! (h+eta)(u*\nabla V4 + V4 * \nabla u - v1pp-v2-v3)
                    + Gamma1*MASK9(I,J)*Max(H(I,J),MinDepthFrc)*(         & 
@@ -283,17 +287,20 @@ ENDIF
                  - CD_breakwater(I,J)*U(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J)) &
                    *Depth(I,J)
        ENDIF
-          
-       SourceY(I,J)=GRAV*(Eta(I,J))/DY*(Depthy(I,J+1)-Depthy(I,J))*MASK(I,J) &
-                          ! friction
+
+       FrcInsY(I,J) =  &
 # if defined (MANNING)
                    -(GRAV*Cd(I,J)**2/  &
                    Max(H(I,J),MinDepthFrc)**(0.333333_SP))  &
                    *V(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J)) &
 # else
-                   -Cd(I,J)*V(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J)) &
-# endif                          
-		          ! dispersion
+                   -Cd(I,J)*V(I,J)*SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J))
+# endif   
+          
+       SourceY(I,J)=GRAV*(Eta(I,J))/DY*(Depthy(I,J+1)-Depthy(I,J))*MASK(I,J) &
+                          ! friction
+                   + FrcInsY(I,J) &                      
+		          ! dispersios
                           ! (h+eta)(u*\nabla V4 + V4 * \nabla u -v1pp-v2-v3)
                    + Gamma1*MASK9(I,J)*Max(H(I,J),MinDepthFrc)*(         & 
                      U(I,J)*0.5_SP*(V4(I+1,J)-V4(I-1,J))/DX+V(I,J)*0.5_SP*(V4(I,J+1)-V4(I,J-1))/DY &
@@ -411,7 +418,9 @@ ENDIF
                        0.5_SP/DX*(Q(I,J)+Q(I,J+1)-Q(I-1,J)-Q(I-1,J+1)) )
 
      ELSE
-       SourceX(I,J) = SourceX(I,J) + 0.5_SP/DX*( &
+       ! breaksourceX and Y will be used in other places like dissipation analysis
+
+       BreakSourceX(I,J) = 0.5_SP/DX*( &
                       (nu_vis(I+1,J)+nu_vis(I,J)) &
                       *1.0_SP/DX*(HU(I+1,J)-HU(I,J)) &
                      -(nu_vis(I-1,J)+nu_vis(I,J)) &
@@ -422,10 +431,10 @@ ENDIF
                      -(nu_vis(I,J-1)+nu_vis(I,J)) &
                       *1.0_SP/DY*(HU(I,J)-HU(I,J-1)) )
 
+       SourceX(I,J) = SourceX(I,J) + BreakSourceX(I,J)
 
-                     
 
-       SourceY(I,J) = SourceY(I,J) + 0.5_SP/DX*( &
+        BreakSourceY(I,J) = 0.5_SP/DX*( &
                       (nu_vis(I+1,J)+nu_vis(I,J)) &
                       *1.0_SP/DX*(HV(I+1,J)-HV(I,J)) &
                      -(nu_vis(I-1,J)+nu_vis(I,J)) &
@@ -434,7 +443,9 @@ ENDIF
                       (nu_vis(I,J+1)+nu_vis(I,J)) &
                       *1.0_SP/DY*(HV(I,J+1)-HV(I,J)) &
                      -(nu_vis(I,J-1)+nu_vis(I,J)) &
-                      *1.0_SP/DY*(HV(I,J)-HV(I,J-1)) )
+                      *1.0_SP/DY*(HV(I,J)-HV(I,J-1)) )            
+
+       SourceY(I,J) = SourceY(I,J) + BreakSourceY(I,J)
 
      ENDIF ! end pq_scheme
 

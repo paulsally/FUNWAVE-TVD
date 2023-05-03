@@ -8,12 +8,12 @@ Module MOD_FOAM
 # endif
      IMPLICIT NONE
      REAL(SP):: PLOT_INTV_FOAM,PLOT_COUNT_FOAM
-     REAL(SP),PARAMETER :: BurstRate=0.01_SP
-     REAL(SP),PARAMETER :: Drag=0.1_SP
-     REAL(SP),PARAMETER :: SpeedLimit=2.0_SP
-     REAL(SP),PARAMETER :: MinThick=0.01_SP
-     REAL(SP),PARAMETER :: TransferRate=0.1_SP
-     REAL(SP),PARAMETER :: CdFoam=0.5
+     REAL(SP) :: BurstRate=0.01_SP
+!     REAL(SP) :: Drag=0.1_SP
+!     REAL(SP) :: SpeedLimit=2.0_SP
+     REAL(SP) :: MinThick=0.01_SP
+     REAL(SP) :: TransferRate=0.1_SP
+     REAL(SP) :: CdFoam=0.5
 
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: EtaFoam,UFoam,VFoam
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Usurf1,Vsurf1,VFsurf1, &
@@ -78,8 +78,106 @@ SUBROUTINE INITIALIZATION_FOAM
       WRITE(3,'(A50)')'PLOT_INTV_FOAM not specified, use SAME'
 # endif
        PLOT_INTV_FOAM = PLOT_INTV
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'PLOT_INTV_FOAM =', PLOT_INTV_FOAM
+# else
+      WRITE(3,'(A20,F12.2)')'PLOT_INTV_FOAM =', PLOT_INTV_FOAM
+# endif
      ENDIF
 
+!!!!     REAL(SP),PARAMETER :: BurstRate=0.01_SP
+
+      CALL READ_FLOAT(BurstRate,FILE_NAME,'BurstRate',ierr)
+      IF(ierr==1)THEN
+        BurstRate = 0.01_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'Foam BurstRate not specified, use Default:  0.01'
+         WRITE(3,'(A80)')'Foam BurstRate not specified, use Default:  0.01'
+      endif
+# else
+         WRITE(*,'(A80)')'Foam BurstRate not specified, use Default:  0.01'
+         WRITE(3,'(A80)')'Foam BurstRate not specified, use Default:  0.01'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'Foam BurstRate =', BurstRate
+# else
+      WRITE(3,'(A20,F12.2)')'Foam BurstRate =', BurstRate
+# endif
+       ENDIF
+
+!!!!     REAL(SP),PARAMETER :: MinThick=0.01_SP
+
+      CALL READ_FLOAT(MinThick,FILE_NAME,'MinThick',ierr)
+      IF(ierr==1)THEN
+        MinThick = 0.01_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'Foam MinThick not specified, use Default:  0.01'
+         WRITE(3,'(A80)')'Foam MinThick not specified, use Default:  0.01'
+      endif
+# else
+         WRITE(*,'(A80)')'Foam MinThick not specified, use Default:  0.01'
+         WRITE(3,'(A80)')'Foam MinThick not specified, use Default:  0.01'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'Foam MinThick =', MinThick
+# else
+      WRITE(3,'(A20,F12.2)')'Foam MinThick =', MinThick
+# endif
+       ENDIF
+
+
+!!!!     REAL(SP),PARAMETER :: TransferRate=0.1_SP
+
+      CALL READ_FLOAT(TransferRate,FILE_NAME,'TransferRate',ierr)
+      IF(ierr==1)THEN
+        TransferRate = 0.1_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'Foam TransferRate not specified, use Default:  0.1'
+         WRITE(3,'(A80)')'Foam TransferRate not specified, use Default:  0.1'
+      endif
+# else
+         WRITE(*,'(A80)')'Foam TransferRate not specified, use Default:  0.1'
+         WRITE(3,'(A80)')'Foam TransferRate not specified, use Default:  0.1'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'Foam TransferRate =', TransferRate
+# else
+      WRITE(3,'(A20,F12.2)')'Foam TransferRate =', TransferRate
+# endif
+       ENDIF
+
+
+!!!!     REAL(SP),PARAMETER :: CdFoam=0.5
+
+      CALL READ_FLOAT(CdFoam,FILE_NAME,'CdFoam',ierr)
+      IF(ierr==1)THEN
+        CdFoam = 0.5_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'Foam CdFoam not specified, use Default:  0.5'
+         WRITE(3,'(A80)')'Foam CdFoam not specified, use Default:  0.5'
+      endif
+# else
+         WRITE(*,'(A80)')'Foam CdFoam not specified, use Default:  0.5'
+         WRITE(3,'(A80)')'Foam CdFoam not specified, use Default:  0.5'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'Foam CdFoam =', CdFoam
+# else
+      WRITE(3,'(A20,F12.2)')'Foam CdFoam =', CdFoam
+# endif
+       ENDIF
+
+
+! all other variables used for foam
      EtaFoam=ZERO
      UFoam=ZERO
      VFoam=ZERO

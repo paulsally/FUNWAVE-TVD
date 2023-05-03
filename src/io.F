@@ -3405,6 +3405,10 @@ SUBROUTINE READ_INPUT
       CALL READ_LOGICAL(OUT_SYR,FILE_NAME,'SYR',ierr)
       CALL READ_LOGICAL(OUT_SourceX,FILE_NAME,'SourceX',ierr)
       CALL READ_LOGICAL(OUT_SourceY,FILE_NAME,'SourceY',ierr)
+      CALL READ_LOGICAL(OUT_FrcX,FILE_NAME,'FrcX',ierr)
+      CALL READ_LOGICAL(OUT_FrcY,FILE_NAME,'FrcY',ierr)
+      CALL READ_LOGICAL(OUT_BrkdisX,FILE_NAME,'BrkdisX',ierr)
+      CALL READ_LOGICAL(OUT_BrkdisY,FILE_NAME,'BrkdisY',ierr)
       CALL READ_LOGICAL(OUT_P,FILE_NAME,'P',ierr)
       CALL READ_LOGICAL(OUT_Q,FILE_NAME,'Q',ierr)
       CALL READ_LOGICAL(OUT_Fx,FILE_NAME,'Fx',ierr)
@@ -4367,6 +4371,24 @@ SUBROUTINE PREVIEW
 !         call PutFile(TMP_NAME,etat) 
       ENDIF
 
+       IF(OUT_FrcX)THEN
+        TMP_NAME = TRIM(FDIR)//'FrcInsX_'//TRIM(FILE_NAME)
+         call PutFile(TMP_NAME,FrcInsX)
+       ENDIF
+       IF(OUT_FrcY)THEN
+        TMP_NAME = TRIM(FDIR)//'FrcInsY_'//TRIM(FILE_NAME)
+         call PutFile(TMP_NAME,FrcInsY)
+       ENDIF
+       IF(OUT_BrkdisX)THEN
+        TMP_NAME = TRIM(FDIR)//'BrkSrcX_'//TRIM(FILE_NAME)
+         call PutFile(TMP_NAME,BreakSourceX)
+       ENDIF
+       IF(OUT_BrkdisY)THEN
+        TMP_NAME = TRIM(FDIR)//'BrkSrcY_'//TRIM(FILE_NAME)
+         call PutFile(TMP_NAME,BreakSourceY)
+       ENDIF
+
+
       IF(OUT_Time)THEN
         TMP_NAME = TRIM(FDIR)//'time_'//TRIM(FILE_NAME)
         call PutFile(TMP_NAME,ARRTIME)
@@ -4559,6 +4581,11 @@ SUBROUTINE PREVIEW_MEAN
           call PutFile(TMP_NAME,FRCXmean)
           TMP_NAME = TRIM(FDIR)//'FRCY_'//TRIM(FILE_NAME)
           call PutFile(TMP_NAME,FRCYmean)
+          TMP_NAME = TRIM(FDIR)//'BrkDissX_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,BreakDissX)
+          TMP_NAME = TRIM(FDIR)//'BrkDissY_'//TRIM(FILE_NAME)
+          call PutFile(TMP_NAME,BreakDissY)
+
         ENDIF
                     
 

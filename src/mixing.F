@@ -58,18 +58,21 @@ SUBROUTINE MIXING_STUFF
 	!ykchoi (be careful)
 	!I think Umean, Vmean is not using in other routine.
       IF( time >= STEADY_TIME )THEN    
-      CALL CALCULATE_MEAN(T_INTV_mean,T_sum,DT,DXg,DYg,Mloc,Nloc,U,V,Wsurf,ETA,ETA0,&
-           Umean,Vmean,ETAmean,Usum,Vsum,ETAsum,WaveHeightRMS, &
-           WaveHeightAve,Emax,Emin,Num_Zero_Up,Ibeg,Iend,Jbeg,Jend, &
-           HrmsSum,HavgSum, &
-	     !ykchoi
-	     ETA2sum, ETA2mean, SigWaveHeight, &
-                 UUsum,UUmean,UVsum,UVmean,VVsum,VVmean, &
-                 WWsum,WWmean,FRCXsum,FRCXmean,FRCYsum,FRCYmean, &
-                 DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH,&
-                 Cd,Depth,U_davg,V_davg,U_davg_sum,V_davg_sum, &
-                  U_davg_mean,V_davg_mean,P_center,Q_center,P_sum,Q_sum, &
-                  P_mean,Q_mean,MinDepthFrc)
+      CALL CALCULATE_MEAN
+
+!      CALL CALCULATE_MEAN(T_INTV_mean,T_sum,DT,DXg,DYg,Mloc,Nloc,U,V,Wsurf,ETA,ETA0,&
+!           Umean,Vmean,ETAmean,Usum,Vsum,ETAsum,WaveHeightRMS, &
+!           WaveHeightAve,Emax,Emin,Num_Zero_Up,Ibeg,Iend,Jbeg,Jend, &
+!           HrmsSum,HavgSum, &
+!	     !ykchoi
+!	     ETA2sum, ETA2mean, SigWaveHeight, &
+!                 UUsum,UUmean,UVsum,UVmean,VVsum,VVmean, &
+!                 WWsum,WWmean,FRCXsum,FRCXmean,FRCYsum,FRCYmean, &
+!                 DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH,&
+!                 Cd,Depth,U_davg,V_davg,U_davg_sum,V_davg_sum, &
+!                  U_davg_mean,V_davg_mean,P_center,Q_center,P_sum,Q_sum, &
+!                  P_mean,Q_mean,MinDepthFrc)
+
       ENDIF    !ykchoi
 
 END SUBROUTINE MIXING_STUFF
@@ -86,51 +89,56 @@ END SUBROUTINE MIXING_STUFF
 !                 Young-Kwang Choi added some time-averaging stuff
 !
 !-------------------------------------------------------------------------------------
-      SUBROUTINE CALCULATE_MEAN(T_INTV_mean,T_sum,DT,DXg,DYg,M,N,U,V,Wsurf,ETA,ETA0,&
-                Umean,Vmean,ETAmean,Usum,Vsum,ETAsum,&
-                WaveHeightRMS, &
-                WaveHeightAve,Emax,Emin,Num_Zero_Up,Ibeg,Iend,Jbeg,Jend, &
-                HrmsSum,HavgSum, &
-	          !ykchoi
-			  ETA2sum,ETA2mean,SigWaveHeight, &
-                  ! for radiation stress
-                 UUsum,UUmean,UVsum,UVmean,VVsum,VVmean, &
-                 WWsum,WWmean,FRCXsum,FRCXmean,FRCYsum,FRCYmean, &
-                 DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH, &
-                 Cd,Depth,U_davg,V_davg,U_davg_sum,V_davg_sum, &
-                  U_davg_mean,V_davg_mean,P_center,Q_center,P_sum,Q_sum, &
-                  P_mean,Q_mean,MinDepthFrc)
+!      SUBROUTINE CALCULATE_MEAN(T_INTV_mean,T_sum,DT,DXg,DYg,M,N,U,V,Wsurf,ETA,ETA0,&
+!                Umean,Vmean,ETAmean,Usum,Vsum,ETAsum,&
+!                WaveHeightRMS, &
+!                WaveHeightAve,Emax,Emin,Num_Zero_Up,Ibeg,Iend,Jbeg,Jend, &
+!                HrmsSum,HavgSum, &
+!	          !ykchoi
+!			  ETA2sum,ETA2mean,SigWaveHeight, &
+!                  ! for radiation stress
+!                 UUsum,UUmean,UVsum,UVmean,VVsum,VVmean, &
+!                 WWsum,WWmean,FRCXsum,FRCXmean,FRCYsum,FRCYmean, &
+!                 DxSxx,DySxy,DySyy,DxSxy,PgrdX,PgrdY,DxUUH,DyUVH,DyVVH,DxUVH, &
+!                 Cd,Depth,U_davg,V_davg,U_davg_sum,V_davg_sum, &
+!                  U_davg_mean,V_davg_mean,P_center,Q_center,P_sum,Q_sum, &
+!                  P_mean,Q_mean,MinDepthFrc,BreakDissX,BreakDissY)
 ! calculate mean for smagorinsky s mixing and wave height
 
-      USE PARAM
+      SUBROUTINE CALCULATE_MEAN
+      USE GLOBAL
       IMPLICIT NONE
-      INTEGER, INTENT(IN) :: M,N,Ibeg,Iend,Jbeg,Jend
-      REAL(SP),DIMENSION(M,N),INTENT(IN)::U,V,ETA,ETA0,Wsurf,Cd,Depth
-      REAL(SP),INTENT(IN) :: T_INTV_mean,DT,DXg,DYg,MinDepthFrc
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Umean,Vmean
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: WaveHeightRMS,WaveHeightAve
-      REAL(SP),DIMENSION(M,N),INTENT(INOUT) ::ETAmean
-      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: Usum,Vsum,ETAsum
-      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: HrmsSum,HavgSum
-      REAL(SP),INTENT(OUT) :: T_sum
       REAL(SP)::Tmpe,Tmp_0
-      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: Emax,Emin
-      INTEGER,DIMENSION(M,N),INTENT(INOUT) :: Num_Zero_Up
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: UUmean,UUsum,UVmean,UVsum,VVmean,VVsum
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: WWmean,WWsum
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: FRCXmean,FRCXsum
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: FRCYmean,FRCYsum
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: DxSxx,DySxy,DySyy,DxSxy, &
-                                            PgrdX,PgrdY,DxUUH,DyUVH, &
-                                            DyVVH,DxUVH	
-      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: U_davg_sum,V_davg_sum, &
-                                             U_davg_mean,V_davg_mean,&
-                                             P_sum,Q_sum, &
-                                             P_mean,Q_mean
-      REAL(SP),DIMENSION(M,N),INTENT(IN) :: U_davg,V_davg,P_center,Q_center
+
+!      INTEGER, INTENT(IN) :: M,N,Ibeg,Iend,Jbeg,Jend
+!      REAL(SP),DIMENSION(M,N),INTENT(IN)::U,V,ETA,ETA0,Wsurf,Cd,Depth
+!      REAL(SP),INTENT(IN) :: T_INTV_mean,DT,DXg,DYg,MinDepthFrc
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: Umean,Vmean
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: WaveHeightRMS,WaveHeightAve
+!      REAL(SP),DIMENSION(M,N),INTENT(INOUT) ::ETAmean
+!      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: Usum,Vsum,ETAsum
+!      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: HrmsSum,HavgSum
+!      REAL(SP),INTENT(OUT) :: T_sum
+!      REAL(SP)::Tmpe,Tmp_0
+!      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: Emax,Emin
+!      INTEGER,DIMENSION(M,N),INTENT(INOUT) :: Num_Zero_Up
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: UUmean,UUsum,UVmean,UVsum,VVmean,VVsum
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: WWmean,WWsum
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: FRCXmean,FRCXsum
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: FRCYmean,FRCYsum
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: DxSxx,DySxy,DySyy,DxSxy, &
+!                                            PgrdX,PgrdY,DxUUH,DyUVH, &
+!                                            DyVVH,DxUVH
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: BreakDissX,BreakDissY
+	
+!      REAL(SP),DIMENSION(M,N),INTENT(OUT) :: U_davg_sum,V_davg_sum, &
+!                                             U_davg_mean,V_davg_mean,&
+!                                             P_sum,Q_sum, &
+!                                             P_mean,Q_mean
+!      REAL(SP),DIMENSION(M,N),INTENT(IN) :: U_davg,V_davg,P_center,Q_center
 
 	!ykchoi
-      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: ETA2sum,ETA2mean,SigWaveHeight
+!      REAL(SP),DIMENSION(M,N),INTENT(INOUT) :: ETA2sum,ETA2mean,SigWaveHeight
       
       T_sum=T_sum+DT
       IF(T_sum.GE.T_INTV_mean)THEN
@@ -155,6 +163,8 @@ END SUBROUTINE MIXING_STUFF
         WWsum = 0.25*Wsurf*Wsurf*(Eta-ETAmean+Depth)*DT + WWsum
         FRCXsum = U*SQRT(U*U+V*V)*DT + FRCXsum
         FRCYsum = V*SQRT(U*U+V*V)*DT + FRCYsum
+        BreakDissX_sum = BreakDissX_sum + BreakSourceX*DT
+        BreakDissY_sum = BreakDissY_sum + BreakSourceY*DT
 
         U_davg_mean = U_davg_sum/T_sum
         V_davg_mean = V_davg_sum/T_sum
@@ -166,6 +176,8 @@ END SUBROUTINE MIXING_STUFF
         WWmean = WWsum/T_sum
         FRCXmean = FRCXsum/T_sum
         FRCYmean = FRCYsum/T_sum
+        BreakDissX = BreakDissX_sum/T_sum
+        BreakDissY = BreakDissY_sum/T_sum
 
 ! radiation stresses,
       DO J=Jbeg,Jend
@@ -226,12 +238,14 @@ END SUBROUTINE MIXING_STUFF
         WWsum = ZERO
         FRCXsum = ZERO
         FRCYsum = ZERO
+        BreakDissX_sum = ZERO
+        BreakDissY_sum = ZERO
 
 	  SigWaveHeight = 4.004*SQRT( ETA2mean )  !ykcho
 
 ! wave height
-       DO J=1,N
-       DO I=1,M
+       DO J=1,Nloc
+       DO I=1,Mloc
         IF(Num_Zero_Up(I,J)>=2)THEN
           WaveHeightAve(I,J)=HavgSum(I,J)/Num_Zero_Up(I,J)
           WaveHeightRMS(I,J)=SQRT(HrmsSum(I,J)/Num_Zero_Up(I,J))
@@ -263,10 +277,12 @@ END SUBROUTINE MIXING_STUFF
         WWsum = 0.25*Wsurf*Wsurf*(Eta-ETAmean+Depth)*DT + WWsum
         FRCXsum = U*SQRT(U*U+V*V)*DT + FRCXsum
         FRCYsum = V*SQRT(U*U+V*V)*DT + FRCYsum
+        BreakDissX_sum = BreakDissX_sum + BreakSourceX*DT
+        BreakDissY_sum = BreakDissY_sum + BreakSourceY*DT
 
 ! wave height
-       DO J=1,N
-       DO I=1,M
+       DO J=1,Nloc
+       DO I=1,Mloc
          if(Eta(i,j)>Emax(i,j)) Emax(i,j) = Eta(i,j)
          if(Eta(i,j)<Emin(i,j)) Emin(i,j) = Eta(i,j)
          Tmpe = Eta(i,j)-ETAmean(i,j)
