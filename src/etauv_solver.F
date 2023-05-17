@@ -332,20 +332,7 @@ SUBROUTINE GET_Eta_U_V_HU_HV
      IMPLICIT NONE
      REAL(SP)::Fr,Utotal,Utheta,dep,depl,depr,reta,retal,retar
      REAL(SP),DIMENSION(Mloc,Nloc) :: myA,myC,myD,myF
-# if defined(PARALLEL)
-     REAL(SP),DIMENSION(Nglob) :: AperG,BperG,CperG,DperG,VperG
-     REAL(SP),DIMENSION(Mglob,Nglob) ::glbA,glbC,glbD
-     REAL(SP),DIMENSION(Mglob+2*Nghost,Nglob+2*Nghost)::VG
-# else
-     REAL(SP),DIMENSION(Mloc) :: Axx,Cxx,Dxx
-     REAL(SP),DIMENSION(Mloc) :: U1D
-     REAL(SP),DIMENSION(Nloc) :: Ayy,Cyy,Dyy
-     REAL(SP),DIMENSION(Nloc) :: V1D
-# if defined (CARTESIAN)
-     REAL(SP),DIMENSION(Jend-Jbeg+1) :: Aper,Bper,Cper,Dper,Vper 
-# endif 
-# endif 
-      INTEGER :: IM
+     INTEGER :: IM
 
 ! calculate etar, u and vetar, HU, HV
      H=Eta*Gamma3+Depth
