@@ -672,7 +672,7 @@ SUBROUTINE Tide_READ_DATA_INIT
         ENDIF
       
       IF(TideWest) THEN
-        Ifile = 101
+        Ifile = 201
         OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
         READ(Ifile,'(A80)')  tmp_name 
         READ(Ifile,*) Time_tide_west_2, Eta_tide_west_2, U_tide_west_2, V_tide_west_2
@@ -715,7 +715,7 @@ SUBROUTINE Tide_READ_DATA_INIT
         ENDIF
       
       IF(TideEast) THEN
-        Ifile = 102
+        Ifile = 202
         OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
         READ(Ifile,'(A80)')  tmp_name 
         READ(Ifile,*) Time_tide_east_2, Eta_tide_east_2, U_tide_east_2, V_tide_east_2
@@ -757,7 +757,7 @@ SUBROUTINE Tide_READ_DATA_INIT
         ENDIF
       
       IF(TideSouth) THEN
-        Ifile = 103
+        Ifile = 203
         OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
         READ(Ifile,'(A80)')  tmp_name 
         READ(Ifile,*) Time_tide_south_2, Eta_tide_south_2, U_tide_south_2, V_tide_south_2
@@ -799,7 +799,7 @@ SUBROUTINE Tide_READ_DATA_INIT
         ENDIF
       
       IF(TideNorth) THEN
-        Ifile = 104
+        Ifile = 204
         OPEN(Ifile,FILE=TRIM(TMP_NAME))   !!! here
         READ(Ifile,'(A80)')  tmp_name 
         READ(Ifile,*) Time_tide_north_2, Eta_tide_north_2, U_tide_north_2, V_tide_north_2
@@ -835,7 +835,7 @@ SUBROUTINE TIDE_DATA
 
 ! west ------------------
       IF(TideWest) THEN
-        Ifile = 101  ! west
+        Ifile = 201  ! west
 
         IF(TIME>Time_tide_west_1.AND.TIME>Time_tide_west_2) THEN
 
@@ -889,7 +889,7 @@ SUBROUTINE TIDE_DATA
 
 ! east ------------------
       IF(TideEast) THEN
-        Ifile = 102  ! east
+        Ifile = 202  ! east
 
         IF(TIME>Time_tide_east_1.AND.TIME>Time_tide_east_2) THEN
 
@@ -942,7 +942,7 @@ SUBROUTINE TIDE_DATA
 
 ! south ------------------
       IF(TideSouth) THEN
-        Ifile = 103  ! east
+        Ifile = 203  ! east
 
         IF(TIME>Time_tide_south_1.AND.TIME>Time_tide_south_2) THEN
 
@@ -995,7 +995,7 @@ SUBROUTINE TIDE_DATA
 
 ! north ------------------
       IF(TideNorth) THEN
-        Ifile = 104  ! north
+        Ifile = 204  ! north
 
         IF(TIME>Time_tide_north_1.AND.TIME>Time_tide_north_2) THEN
 
