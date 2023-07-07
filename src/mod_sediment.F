@@ -1095,7 +1095,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
        ELSE ! non-cohesive
 
-!  suspended load
+!  suspended load, Babak set a reduction here, should do more tests fyshi 07/07/2023
           IF (Tau_xy(I,J).GT.Tau_cr) THEN
             c_b=0.015_SP*(((Tau_xy(I,J)-Tau_cr)/Tau_cr)**1.5_SP)*Dstar**(-0.3_SP)
             reduction=MIN(1.0_SP,0.65_SP/c_b)
