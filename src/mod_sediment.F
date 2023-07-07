@@ -74,6 +74,7 @@ MODULE SEDIMENT_MODULE
     LOGICAL :: Avalanche=.FALSE.
     LOGICAL :: IN_Mask_s=.FALSE.
     LOGICAL :: BedLoad = .FALSE.
+    LOGICAL :: PickupReduction = .FALSE.
 
     INTEGER :: Counter_s=0, Counter_ava=0
     INTEGER :: Morph_step,c_dum,Morph_factor
@@ -365,6 +366,22 @@ SUBROUTINE SEDIMENT_INITIAL
          WRITE(3,'(A60)')'You dont specify Sdensity, use default: 2.68'
 # endif
       ENDIF 
+
+      CALL READ_LOGICAL(PickupReduction,FILE_NAME,'PickupReduction',ierr)
+
+      IF(ierr == 1)THEN
+       PickupReduction = .FALSE. 
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A40)')'PickupReduction not defined, Default: False'
+       WRITE(*,'(A40)')'PickupReduction not defined, Default: False'
+      endif
+# else
+      WRITE(3,'(A40)')'PickupReduction not defined, Default: False'
+      WRITE(*,'(A40)')'PickupReduction not defined, Default: False'
+# endif 
+      ENDIF
+
 
       CALL READ_LOGICAL(BED_CHANGE,FILE_NAME,'Bed_Change',ierr)
 
@@ -1095,10 +1112,14 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
        ELSE ! non-cohesive
 
-!  suspended load, Babak set a reduction here, should do more tests fyshi 07/07/2023
+!  suspended load, Babak set a reduction here, I made it optional fyshi 07/07/2023
           IF (Tau_xy(I,J).GT.Tau_cr) THEN
             c_b=0.015_SP*(((Tau_xy(I,J)-Tau_cr)/Tau_cr)**1.5_SP)*Dstar**(-0.3_SP)
-            reduction=MIN(1.0_SP,0.65_SP/c_b)
+            IF(PickupReduction)THEN
+              reduction=MIN(1.0_SP,0.65_SP/c_b)
+            ELSE
+              reduction= 1.0_SP
+            ENDIF
             c_a=reduction*c_b*D50/(MAX(0.01_SP*Hpo(I,J),0.01_SP))
             Pickup(I,J)=MAX(0.0_SP,c_a*WS)
 ! satuation
