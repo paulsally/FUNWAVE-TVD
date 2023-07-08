@@ -4455,6 +4455,9 @@ SUBROUTINE PREVIEW
         TMP_NAME = TRIM(FDIR)//'dep_'//TRIM(FILE_NAME)
         call PutFile(TMP_NAME,Depth)
 
+        TMP_NAME = TRIM(FDIR)//'BedStr_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Tau_xy)
+
 # endif
 ! end sediment
 

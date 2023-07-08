@@ -1334,29 +1334,45 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
         
         IF(slope_max>Tan_phi)THEN 
           IF(i4_record.EQ.1) THEN
-            IF(Zb(I-1,J)<Zs(I-1,J))THEN
-              dh=0.5_SP*(Depth(I,J)-Depth(I-1,J))
+            IF(Zb(I,J)<Zs(I,J))THEN
+# if defined(CARTESIAN)
+              dh=0.5_SP*(Depth(I,J)-Depth(I-1,J))-0.5_SP*Tan_phi*DX
+# else
+              dh=0.5_SP*(Depth(I,J)-Depth(I-1,J))-0.5_SP*Tan_phi*DX(I,J)
+# endif
               Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
               Zb_avalanching(I-1,J)=Zb_avalanching(I-1,J)-dh
             ENDIF
           ENDIF
           IF(i4_record.EQ.2) THEN
-            IF(Zb(I+1,J)<Zs(I+1,J))THEN
-              dh=0.5_SP*(Depth(I,J)-Depth(I+1,J))
+            IF(Zb(I,J)<Zs(I,J))THEN
+# if defined(CARTESIAN)
+              dh=0.5_SP*(Depth(I,J)-Depth(I+1,J))-0.5_SP*Tan_phi*DX
+# else
+              dh=0.5_SP*(Depth(I,J)-Depth(I+1,J))-0.5_SP*Tan_phi*DX(I,J)
+# endif
               Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
               Zb_avalanching(I+1,J)=Zb_avalanching(I+1,J)-dh
             ENDIF
           ENDIF
           IF(i4_record.EQ.3) THEN
-            IF(Zb(I,J-1)<Zs(I,J-1))THEN
-              dh=0.5_SP*(Depth(I,J)-Depth(I,J-1))
+            IF(Zb(I,J)<Zs(I,J))THEN
+# if defined(CARTESIAN)
+              dh=0.5_SP*(Depth(I,J)-Depth(I,J-1))-0.5_SP*Tan_phi*DY
+# else
+              dh=0.5_SP*(Depth(I,J)-Depth(I,J-1))-0.5_SP*Tan_phi*DY(I,J)
+# endif
               Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
               Zb_avalanching(I,J)=Zb_avalanching(I,J-1)-dh
             ENDIF
           ENDIF
           IF(i4_record.EQ.4) THEN
-            IF(Zb(I,J+1)<Zs(I,J+1))THEN
-              dh=0.5_SP*(Depth(I,J)-Depth(I,J+1))
+            IF(Zb(I,J)<Zs(I,J))THEN
+# if defined(CARTESIAN)
+              dh=0.5_SP*(Depth(I,J)-Depth(I,J+1))-0.5_SP*Tan_phi*DY
+# else
+              dh=0.5_SP*(Depth(I,J)-Depth(I,J+1))-0.5_SP*Tan_phi*DY(I,J)
+# endif
               Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
               Zb_avalanching(I,J)=Zb_avalanching(I,J+1)-dh
             ENDIF
@@ -1364,12 +1380,13 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
         ENDIF ! > tan_phi
     ENDDO
     ENDDO
+      Zb = Zb + Zb_avalanching
     ENDIF
 ! end avalanche
 
 ! update depth
-
-    Depth = Depth_ini + (Zb+Zb_avalanching)*Morph_factor
+   
+    Depth = Depth_ini + Zb*Morph_factor
 
     VTYPE=1
     CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,Depth,VTYPE,PERIODIC)
