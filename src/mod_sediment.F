@@ -74,7 +74,7 @@ MODULE SEDIMENT_MODULE
     LOGICAL :: Avalanche=.FALSE.
     LOGICAL :: IN_Mask_s=.FALSE.
     LOGICAL :: BedLoad = .FALSE.
-    LOGICAL :: PickupReduction = .FALSE.
+    LOGICAL :: PickupReduction = .TRUE.
 
     INTEGER :: Counter_s=0, Counter_ava=0
     INTEGER :: Morph_step,c_dum,Morph_factor
@@ -82,7 +82,7 @@ MODULE SEDIMENT_MODULE
     REAL(SP):: PLOT_INTV_SEDIMENT,PLOT_COUNT_SEDIMENT
 
     REAL(SP) :: D50,Sdensity,n_porosity,DT1,Counter,WS,Kappa1,Kappa2, &
-                MinDepthPickup
+                MinDepthPickup, ReductionParameter
 ! cohesive
     REAL(SP) :: a_coh,b_coh,n_coh,m_coh,alpha_coh,E_coh,k_coh,Tau_crd_coh,&
                 Tau_cr_coh
@@ -370,16 +370,40 @@ SUBROUTINE SEDIMENT_INITIAL
       CALL READ_LOGICAL(PickupReduction,FILE_NAME,'PickupReduction',ierr)
 
       IF(ierr == 1)THEN
-       PickupReduction = .FALSE. 
+       PickupReduction = .TRUE. 
 # if defined (PARALLEL) 
       if (myid.eq.0)then
-       WRITE(3,'(A40)')'PickupReduction not defined, Default: False'
-       WRITE(*,'(A40)')'PickupReduction not defined, Default: False'
+       WRITE(3,'(A40)')'PickupReduction not defined, Default: TRUE'
+       WRITE(*,'(A40)')'PickupReduction not defined, Default: TRUE'
       endif
 # else
-      WRITE(3,'(A40)')'PickupReduction not defined, Default: False'
-      WRITE(*,'(A40)')'PickupReduction not defined, Default: False'
+      WRITE(3,'(A40)')'PickupReduction not defined, Default: TRUE'
+      WRITE(*,'(A40)')'PickupReduction not defined, Default: TRUE'
 # endif 
+      ENDIF
+
+      IF(PickupReduction) THEN
+
+! ----- reduction parameter
+      CALL READ_Float(ReductionParameter,FILE_NAME,'ReductionParameter',ierr)
+
+      IF(ierr == 1)THEN
+       ReductionParameter = 0.65_SP 
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A40)')'ReductionParameter not defined, Default: 0.65'
+       WRITE(*,'(A40)')'ReductionParameter not defined, Default: 0.65'
+      endif
+# else
+      WRITE(3,'(A40)')'ReductionParameter not defined, Default: 0.65'
+      WRITE(*,'(A40)')'ReductionParameter not defined, Default: 0.65'
+# endif 
+      ENDIF
+
+! ----- reduction parameter
+      ELSE
+         ! any number
+         ReductionParameter = 1.0   
       ENDIF
 
 
@@ -1116,7 +1140,8 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
           IF (Tau_xy(I,J).GT.Tau_cr) THEN
             c_b=0.015_SP*(((Tau_xy(I,J)-Tau_cr)/Tau_cr)**1.5_SP)*Dstar**(-0.3_SP)
             IF(PickupReduction)THEN
-              reduction=MIN(1.0_SP,0.65_SP/c_b)
+              % default ReductionParameter = 0.65
+              reduction=MIN(1.0_SP,ReductionParameter/c_b)
             ELSE
               reduction= 1.0_SP
             ENDIF
