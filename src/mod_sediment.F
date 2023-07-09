@@ -1140,7 +1140,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
           IF (Tau_xy(I,J).GT.Tau_cr) THEN
             c_b=0.015_SP*(((Tau_xy(I,J)-Tau_cr)/Tau_cr)**1.5_SP)*Dstar**(-0.3_SP)
             IF(PickupReduction)THEN
-              % default ReductionParameter = 0.65
+              ! default ReductionParameter = 0.65
               reduction=MIN(1.0_SP,ReductionParameter/c_b)
             ELSE
               reduction= 1.0_SP
