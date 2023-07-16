@@ -82,7 +82,7 @@ MODULE SEDIMENT_MODULE
     REAL(SP):: PLOT_INTV_SEDIMENT,PLOT_COUNT_SEDIMENT
 
     REAL(SP) :: D50,Sdensity,n_porosity,DT1,Counter,WS,Kappa1,Kappa2, &
-                MinDepthPickup, ReductionParameter
+                MinDepthPickup, ReductionParameter,C_limiter
 ! cohesive
     REAL(SP) :: a_coh,b_coh,n_coh,m_coh,alpha_coh,E_coh,k_coh,Tau_crd_coh,&
                 Tau_cr_coh
@@ -603,6 +603,22 @@ SUBROUTINE SEDIMENT_INITIAL
 # endif
       ENDIF
 
+! C_limiter
+      CALL READ_Float(C_limiter,FILE_NAME,'C_limiter',ierr)
+
+      IF(ierr==1)THEN
+        C_limiter = 0.8_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A60)')'You dont specify C_limiter, use default: 0.8'
+         WRITE(3,'(A60)')'You dont specify C_limiter, use default: 0.8'
+      endif
+# else
+         WRITE(*,'(A60)')'You dont specify C_limiter, use default: 0.8'
+         WRITE(3,'(A60)')'You dont specify C_limiter, use default: 0.8'
+# endif
+      ENDIF
+
       CALL READ_LOGICAL(IN_Mask_s,FILE_NAME,'Hard_bottom',ierr)
 
       IF(ierr==1)THEN
@@ -1093,6 +1109,12 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
         IF(CHH(I,J)<ZERO) CHH(I,J)=ZERO
 
         CH(I,J)=CHH(I,J)/Hpo(I,J)
+
+! limiter
+        IF(CH(I,J)>C_limiter)THEN
+          CH(I,J)=C_limiter
+          CHH(I,J)=CH(I,J)*Hpo(I,J)
+        ENDIF
 
       ENDIF ! mask
 
