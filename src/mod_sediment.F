@@ -88,6 +88,7 @@ MODULE SEDIMENT_MODULE
                 Tau_cr_coh
     LOGICAL :: SoftBed = .TRUE.
     LOGICAL :: CohesiveSediment = .FALSE.
+    LOGICAL :: USE_CLIMITER = .FALSE.
     
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Zb,P_ave,D_ave,Mask_s,D,Pickup,Delta_c
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Zb_avalanching
@@ -607,15 +608,15 @@ SUBROUTINE SEDIMENT_INITIAL
       CALL READ_Float(C_limiter,FILE_NAME,'C_limiter',ierr)
 
       IF(ierr==1)THEN
-        C_limiter = 0.8_SP
+        USE_CLIMITER = .FALSE.
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A60)')'You dont specify C_limiter, use default: 0.8'
-         WRITE(3,'(A60)')'You dont specify C_limiter, use default: 0.8'
+         WRITE(*,'(A60)')'You dont specify C_limiter, use FALSE'
+         WRITE(3,'(A60)')'You dont specify C_limiter, use FALSE'
       endif
 # else
-         WRITE(*,'(A60)')'You dont specify C_limiter, use default: 0.8'
-         WRITE(3,'(A60)')'You dont specify C_limiter, use default: 0.8'
+         WRITE(*,'(A60)')'You dont specify C_limiter, use FALSE'
+         WRITE(3,'(A60)')'You dont specify C_limiter, use FALSE'
 # endif
       ENDIF
 
@@ -1111,9 +1112,11 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
         CH(I,J)=CHH(I,J)/Hpo(I,J)
 
 ! limiter
+        IF(USE_CLIMITER)THEN
         IF(CH(I,J)>C_limiter)THEN
           CH(I,J)=C_limiter
           CHH(I,J)=CH(I,J)*Hpo(I,J)
+        ENDIF
         ENDIF
 
       ENDIF ! mask
