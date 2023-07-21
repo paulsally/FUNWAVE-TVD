@@ -71,6 +71,7 @@ SUBROUTINE UPDATE_MASK
 #endif
 
      MASKtmp=MASK
+! version 3.4 -------- 
 !     ETAtmp=ETA
      Dmass = ZERO
 
@@ -122,9 +123,8 @@ SUBROUTINE UPDATE_MASK
        ELSE
          IF(Eta(I,J)<-Depth(I,J))THEN
           MASKtmp(I,J)=0
-# if defined(UseEtaScreen)
-          ETAtmp(I,J)=MinDepth-Depth(I,J)
-# endif
+! version 3.4 -------- 
+!          ETAtmp(I,J)=MinDepth-Depth(I,J)
 
           IF(I.GE.Ibeg.AND.I.LE.Iend.AND.J.GE.Jbeg.AND.J.LE.Jend)THEN
 # if defined (CARTESIAN)
@@ -160,6 +160,8 @@ SUBROUTINE UPDATE_MASK
 
 
      MASK=MASKtmp
+! version 3.4 -------- 
+!     ETA=ETAtmp
 
 # if defined(UseEtaScreen)
      EtaScreen = ETAtmp
