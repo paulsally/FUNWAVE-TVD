@@ -91,7 +91,7 @@ clf
 %subplot(4,4,[1 5])
 colormap jet
 plot(lonG,latG,'.r','MarkerSize',1)
-plot_google_map('maptype','satellite','APIKey','AIzaSyBeu2oRBtLClpcm4i2VDIXltuzMAOY5yX4')
+plot_google_map('maptype','satellite','APIKey','your key here')
 hold on
 %hsurf=surface(lon,lat,eta*1.+0.0,'FaceColor',[0.0 0.8 1.0],'EdgeColor','none','CDataMapping','direct','DiffuseStrength',0.5);
 %lightangle(210,50)
