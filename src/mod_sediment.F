@@ -75,6 +75,7 @@ MODULE SEDIMENT_MODULE
     LOGICAL :: IN_Mask_s=.FALSE.
     LOGICAL :: BedLoad = .FALSE.
     LOGICAL :: PickupReduction = .TRUE.
+    LOGICAL :: WS_formula = .FALSE.
 
     INTEGER :: Counter_s=0, Counter_ava=0
     INTEGER :: c_dum,Morph_factor
@@ -498,23 +499,23 @@ SUBROUTINE SEDIMENT_INITIAL
         IF(CohesiveSediment)THEN
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A60)')'You dont specify WS, use formula for cohesive sed'
-         WRITE(3,'(A60)')'You dont specify WS, use formula for cohesive sed'
+         WRITE(*,'(A60)')'You dont specify WS, use formula'
+         WRITE(3,'(A60)')'You dont specify WS, use formula'
       endif
 # else
-         WRITE(*,'(A60)')'You dont specify WS, use formula for cohesive sed'
-         WRITE(3,'(A60)')'You dont specify WS, use formula for cohesive sed'
+         WRITE(*,'(A60)')'You dont specify WS, use formula'
+         WRITE(3,'(A60)')'You dont specify WS, use formula'
 # endif
         ELSE ! non-cohesive
-        WS = 0.0125_SP
+        WS_formula = .TRUE.
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A60)')'You dont specify WS, use default: 0.0125m/s'
-         WRITE(3,'(A60)')'You dont specify WS, use default: 0.0125m/s'
+         WRITE(*,'(A60)')'You dont specify WS, use formula'
+         WRITE(3,'(A60)')'You dont specify WS, use formula'
       endif
 # else
-         WRITE(*,'(A60)')'You dont specify WS, use default: 0.0125m/s'
-         WRITE(3,'(A60)')'You dont specify WS, use default: 0.0125m/s'
+         WRITE(*,'(A60)')'You dont specify WS, use formula'
+         WRITE(3,'(A60)')'You dont specify WS, use formula'
 # endif
         ENDIF ! end if or not cohesive
       ENDIF
@@ -711,108 +712,64 @@ SUBROUTINE SEDIMENT_INITIAL
 
 # if defined (PARALLEL)
    IF(MYID==0)THEN
-   WRITE(3,*) '----- Sediment Parameters'
-    IF(CohesiveSediment)THEN
-      WRITE(3,*) 'Cohesive Sediment'
-      WRITE(3,*) 'SoftBed', SoftBed
-      WRITE(3,*) 'Critical deposition stress: Tau_crd_coh ', Tau_crd_coh
-      WRITE(3,*) 'Critical pickup stress: Tau_cr_coh ', Tau_cr_coh
-      WRITE(3,*) 'Diffusion coefficient: k_coh ', k_coh
-      WRITE(3,*) 'flocs settling parameter: a_coh ', a_coh
-      WRITE(3,*) 'flocs settling parameter: b_coh ', b_coh
-      WRITE(3,*) 'flocs settling parameter: m_coh ', m_coh
-      WRITE(3,*) 'flocs settling parameter: n_coh ', n_coh
-      WRITE(3,*) 'Erosion rate: E_coh ', E_coh
-      WRITE(3,*) 'alpha for softbed: alpha_coh ', alpha_coh
-
-      WRITE(3,*) 'D50:  ', D50
-      WRITE(3,*) 'specific gravity of sediment, Sdensity ', Sdensity
-      WRITE(3,*) 'Bed_Change:  ', BED_CHANGE
-      WRITE(3,*) 'Minimum Depth  for Pickup: MinDepthPickup  ', MinDepthPickup
-      WRITE(3,*) 'BedLoad:  ', BedLoad
-      WRITE(3,*) 'Porosity:  ', n_porosity
-      WRITE(3,*) 'Settling velocity: calculated based on formula '
-      WRITE(3,*) 'Morph_interval:  ', Morph_interval
-      WRITE(3,*) 'Morph_factor:  ', Morph_factor
-      WRITE(3,*) 'Avalanche:  ', Avalanche
-      WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
-      WRITE(3,*) 'Hard_bottom:  ', IN_Mask_s
-      WRITE(3,*) '----- end sedment parameters  '
- 
-    ELSE
-
-      WRITE(3,*) 'Non-cohesive Sediment'
-      WRITE(3,*) 'D50:  ', D50
-      WRITE(3,*) 'specific gravity of sediment, Sdensity ', Sdensity
-      WRITE(3,*) 'Bed_Change:  ', BED_CHANGE
-      WRITE(3,*) 'Minimum Depth  for Pickup: MinDepthPickup  ', MinDepthPickup
-      WRITE(3,*) 'BedLoad:  ', BedLoad
-      WRITE(3,*) 'Porosity:  ', n_porosity
-      WRITE(3,*) 'Settling velocity Ws: ', WS
-      WRITE(3,*) 'Critical Shields number:  ', Shields_cr
-      WRITE(3,*) 'Critical Shields number for bedload:  ', Shields_cr_bedload
-      WRITE(3,*) 'Morph_interval:  ', Morph_interval
-      WRITE(3,*) 'Morph_factor:  ', Morph_factor
-      WRITE(3,*) 'Avalanche:  ', Avalanche
-      WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
-      WRITE(3,*) 'Hard_bottom:  ', IN_Mask_s
-      WRITE(3,*) '----- end sedment parameters  '
- 
-    ENDIF ! end cohesive 
-
-   ENDIF ! end myid
-# else
- 
-   WRITE(3,*) '----- Sediment Parameters'
-    IF(CohesiveSediment)THEN
-      WRITE(3,*) 'Cohesive Sediment'
-      WRITE(3,*) 'SoftBed', SoftBed
-      WRITE(3,*) 'Critical deposition stress: Tau_crd_coh ', Tau_crd_coh
-      WRITE(3,*) 'Critical pickup stress: Tau_cr_coh ', Tau_cr_coh
-      WRITE(3,*) 'Diffusion coefficient: k_coh ', k_coh
-      WRITE(3,*) 'flocs settling parameter: a_coh ', a_coh
-      WRITE(3,*) 'flocs settling parameter: b_coh ', b_coh
-      WRITE(3,*) 'flocs settling parameter: m_coh ', m_coh
-      WRITE(3,*) 'flocs settling parameter: n_coh ', n_coh
-      WRITE(3,*) 'Erosion rate: E_coh ', E_coh
-      WRITE(3,*) 'alpha for softbed: alpha_coh ', alpha_coh
-
-      WRITE(3,*) 'D50:  ', D50
-      WRITE(3,*) 'specific gravity of sediment, Sdensity ', Sdensity
-      WRITE(3,*) 'Bed_Change:  ', BED_CHANGE
-      WRITE(3,*) 'Minimum Depth  for Pickup: MinDepthPickup  ', MinDepthPickup
-      WRITE(3,*) 'BedLoad:  ', BedLoad
-      WRITE(3,*) 'Porosity:  ', n_porosity
-      WRITE(3,*) 'Settling velocity: calculated based on formula '
-      WRITE(3,*) 'Morph_interval:  ', Morph_interval
-      WRITE(3,*) 'Morph_factor:  ', Morph_factor
-      WRITE(3,*) 'Avalanche:  ', Avalanche
-      WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
-      WRITE(3,*) 'Hard_bottom:  ', IN_Mask_s
-      WRITE(3,*) '----- end sedment parameters  '
- 
-    ELSE
-
-      WRITE(3,*) 'Non-cohesive Sediment'
-      WRITE(3,*) 'D50:  ', D50
-      WRITE(3,*) 'specific gravity of sediment, Sdensity ', Sdensity
-      WRITE(3,*) 'Bed_Change:  ', BED_CHANGE
-      WRITE(3,*) 'Minimum Depth  for Pickup: MinDepthPickup  ', MinDepthPickup
-      WRITE(3,*) 'BedLoad:  ', BedLoad
-      WRITE(3,*) 'Porosity:  ', n_porosity
-      WRITE(3,*) 'Settling velocity Ws: ', WS
-      WRITE(3,*) 'Critical Shields number:  ', Shields_cr
-      WRITE(3,*) 'Critical Shields number for bedload:  ', Shields_cr_bedload
-      WRITE(3,*) 'Morph_interval:  ', Morph_interval
-      WRITE(3,*) 'Morph_factor:  ', Morph_factor
-      WRITE(3,*) 'Avalanche:  ', Avalanche
-      WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
-      WRITE(3,*) 'Hard_bottom:  ', IN_Mask_s
-      WRITE(3,*) '----- end sedment parameters  '
- 
-    ENDIF ! end cohesive 
-
 # endif
+   WRITE(3,*) '----- Sediment Parameters'
+    IF(CohesiveSediment)THEN
+      WRITE(3,*) 'Cohesive Sediment'
+      WRITE(3,*) 'SoftBed', SoftBed
+      WRITE(3,*) 'Critical deposition stress: Tau_crd_coh ', Tau_crd_coh
+      WRITE(3,*) 'Critical pickup stress: Tau_cr_coh ', Tau_cr_coh
+      WRITE(3,*) 'Diffusion coefficient: k_coh ', k_coh
+      WRITE(3,*) 'flocs settling parameter: a_coh ', a_coh
+      WRITE(3,*) 'flocs settling parameter: b_coh ', b_coh
+      WRITE(3,*) 'flocs settling parameter: m_coh ', m_coh
+      WRITE(3,*) 'flocs settling parameter: n_coh ', n_coh
+      WRITE(3,*) 'Erosion rate: E_coh ', E_coh
+      WRITE(3,*) 'alpha for softbed: alpha_coh ', alpha_coh
+
+      WRITE(3,*) 'D50:  ', D50
+      WRITE(3,*) 'specific gravity of sediment, Sdensity ', Sdensity
+      WRITE(3,*) 'Bed_Change:  ', BED_CHANGE
+      WRITE(3,*) 'Minimum Depth  for Pickup: MinDepthPickup  ', MinDepthPickup
+      WRITE(3,*) 'BedLoad:  ', BedLoad
+      WRITE(3,*) 'Porosity:  ', n_porosity
+      WRITE(3,*) 'Settling velocity: calculated based on formula '
+      WRITE(3,*) 'Morph_interval:  ', Morph_interval
+      WRITE(3,*) 'Morph_factor:  ', Morph_factor
+      WRITE(3,*) 'Avalanche:  ', Avalanche
+      WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
+      WRITE(3,*) 'Hard_bottom:  ', IN_Mask_s
+      WRITE(3,*) '----- end sedment parameters  '
+ 
+    ELSE
+
+      WRITE(3,*) 'Non-cohesive Sediment'
+      WRITE(3,*) 'D50:  ', D50
+      WRITE(3,*) 'specific gravity of sediment, Sdensity ', Sdensity
+      WRITE(3,*) 'Bed_Change:  ', BED_CHANGE
+      WRITE(3,*) 'Minimum Depth  for Pickup: MinDepthPickup  ', MinDepthPickup
+      WRITE(3,*) 'BedLoad:  ', BedLoad
+      WRITE(3,*) 'Porosity:  ', n_porosity
+      IF(WS_formula)THEN
+       WRITE(3,*) 'Settling velocity Ws calculated by formula '
+       ELSE
+       WRITE(3,*) 'Settling velocity Ws: ', WS
+      ENDIF
+      WRITE(3,*) 'Critical Shields number:  ', Shields_cr
+      WRITE(3,*) 'Critical Shields number for bedload:  ', Shields_cr_bedload
+      WRITE(3,*) 'Morph_interval:  ', Morph_interval
+      WRITE(3,*) 'Morph_factor:  ', Morph_factor
+      WRITE(3,*) 'Avalanche:  ', Avalanche
+      WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
+      WRITE(3,*) 'Hard_bottom:  ', IN_Mask_s
+      WRITE(3,*) '----- end sedment parameters  '
+ 
+    ENDIF ! end cohesive 
+
+# if defined (PARALLEL)
+   ENDIF ! end myid
+# endif
+ 
 
 ! ALLOCATION
 
@@ -898,7 +855,20 @@ SUBROUTINE SEDIMENT_INITIAL
       Tau_cr=(Sdensity-1.0_SP)*grav*D50*Shields_cr
       Tau_cr_bedload=(Sdensity-1.0_SP)*grav*D50*Shields_cr_bedload
       k_s = 2.5_SP*D50 
-      Satuation = 0.001
+      
+      IF(WS_formula) THEN
+        WS = SQRT((Sdensity-1.0_SP)*grav*D50)* &
+             SQRT(2.0_SP/3.0_SP + 36.0_SP*viscosity**2/((Sdensity-1.0_SP)*grav*D50**3)) * &
+             SQRT(36.0_SP*viscosity**2/((Sdensity-1.0_SP)*grav*D50**3))
+# if defined (PARALLEL)
+       IF(MYID==0)THEN
+# endif
+         WRITE(3,*) 'Calculated Settling velocity Ws: ', WS
+         WRITE(*,*) 'Calculated Settling velocity Ws: ', WS
+# if defined (PARALLEL)
+       ENDIF
+# endif
+      ENDIF
 
      IF(IN_Mask_s)THEN
 ! check existing
