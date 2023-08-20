@@ -4436,16 +4436,23 @@ SUBROUTINE PREVIEW
 ! sediment
 # if defined (SEDIMENT)
         TMP_NAME = TRIM(FDIR)//'C_'//TRIM(FILE_NAME)
-        call PutFile(TMP_NAME,CH *Sdensity*RHO_WATER)
+!        call PutFile(TMP_NAME,CH *Sdensity*RHO_WATER)
+       ! change to non-dimensional 
+        call PutFile(TMP_NAME,CH)
         TMP_NAME = TRIM(FDIR)//'Pick_'//TRIM(FILE_NAME)
         call PutFile(TMP_NAME,Pickup)
         TMP_NAME = TRIM(FDIR)//'Depo_'//TRIM(FILE_NAME)
         call PutFile(TMP_NAME,D)
 
+        TMP_NAME = TRIM(FDIR)//'Pavg_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,P_ave)
+        TMP_NAME = TRIM(FDIR)//'Davg_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,D_ave)
+
         TMP_NAME = TRIM(FDIR)//'DchgS_'//TRIM(FILE_NAME)
-        call PutFile(TMP_NAME,TotalSuspendLoad)
+        call PutFile(TMP_NAME,TotalSuspendLoad/(1.0_SP-n_porosity))
         TMP_NAME = TRIM(FDIR)//'DchgB_'//TRIM(FILE_NAME)
-        call PutFile(TMP_NAME,TotalBedLoad)
+        call PutFile(TMP_NAME,TotalBedLoad/(1.0_SP-n_porosity))
 
         TMP_NAME = TRIM(FDIR)//'BedFx_'//TRIM(FILE_NAME)
         call PutFile(TMP_NAME,BedFluxX)
@@ -4457,6 +4464,27 @@ SUBROUTINE PREVIEW
 
         TMP_NAME = TRIM(FDIR)//'BedStr_'//TRIM(FILE_NAME)
         call PutFile(TMP_NAME,Tau_xy)
+
+        TMP_NAME = TRIM(FDIR)//'Aval_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Zb_avalanching)
+
+        TMP_NAME = TRIM(FDIR)//'AvalAc_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Aval_accum)
+
+
+#if defined (SEDIMENT_DEBUG)
+        TMP_NAME = TRIM(FDIR)//'Cb_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Cb_debug)
+        TMP_NAME = TRIM(FDIR)//'Ca_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Ca_debug)
+        TMP_NAME = TRIM(FDIR)//'Redu_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Reduct_debug)
+        TMP_NAME = TRIM(FDIR)//'TauEx_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Tau_extra)
+        TMP_NAME = TRIM(FDIR)//'Hpo_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,Hpo)
+# endif 
+
 
 # endif
 ! end sediment

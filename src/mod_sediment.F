@@ -77,9 +77,10 @@ MODULE SEDIMENT_MODULE
     LOGICAL :: PickupReduction = .TRUE.
 
     INTEGER :: Counter_s=0, Counter_ava=0
-    INTEGER :: Morph_step,c_dum,Morph_factor
+    INTEGER :: c_dum,Morph_factor
 
     REAL(SP):: PLOT_INTV_SEDIMENT,PLOT_COUNT_SEDIMENT
+    REAL(SP):: T_sum_sediment
 
     REAL(SP) :: D50,Sdensity,n_porosity,DT1,Counter,WS,Kappa1,Kappa2, &
                 MinDepthPickup, ReductionParameter,C_limiter
@@ -91,6 +92,7 @@ MODULE SEDIMENT_MODULE
     LOGICAL :: USE_CLIMITER = .FALSE.
     
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Zb,P_ave,D_ave,Mask_s,D,Pickup,Delta_c
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE::P_sum,D_sum
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Zb_avalanching
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::CH,CHX,CHY,CHH,CHHxR,CHHxL,CHXxL,CHXxR
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::CHHyR,CHHyL,CHYyL,CHYyR,ZbOld,dZb
@@ -99,6 +101,7 @@ MODULE SEDIMENT_MODULE
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Hpo,CHH0,TotalSuspendLoad,TotalBedLoad
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Depth_ini
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Tau_xy
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE::Aval_accum 
 
 
     REAL(SP) :: Shields_cr,A_sed,Tau_cr,D_sed,htt,k_s,u_c,ustar_c,ec_max
@@ -107,6 +110,11 @@ MODULE SEDIMENT_MODULE
     REAL(SP) :: u_c1,u_c2,u_c3,u_c4,ustar_c1,ustar_c2,ustar_c3,ustar_c4
     REAL(SP) :: k1,k2,k3,k4,F1,F2,F3,F4,tan_phi,Dstar,viscosity
     REAL(SP) :: Satuation
+    REAL(SP) :: Morph_interval
+#if defined (SEDIMENT_DEBUG)
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE::Cb_debug,Ca_debug,Reduct_debug, &
+                           Tau_extra
+# endif 
 
 #if defined (PARALLEL)
     REAL(SP) :: myvar
@@ -545,18 +553,19 @@ SUBROUTINE SEDIMENT_INITIAL
        ENDIF
       ENDIF
 
-      CALL READ_INTEGER(Morph_step,FILE_NAME,'Morph_step',ierr)
+
+      CALL READ_Float(Morph_interval,FILE_NAME,'Morph_interval',ierr)
 
       IF(ierr==1)THEN
-        Morph_step = 25
+        Morph_interval = SMALL
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A60)')'You dont specify Morph_step, use default: 25'
-         WRITE(3,'(A60)')'You dont specify Morph_step, use default: 25'
+         WRITE(*,'(A60)')'You dont specify Morph_interval, use default: SMALL'
+         WRITE(3,'(A60)')'You dont specify Morph_interval, use default: SMALL'
       endif
 # else
-         WRITE(*,'(A60)')'You dont specify Morph_step, use default: 25'
-         WRITE(3,'(A60)')'You dont specify Morph_step, use default: 25'
+         WRITE(*,'(A60)')'You dont specify Morph_interval, use default: SMALL'
+         WRITE(3,'(A60)')'You dont specify Morph_interval, use default: SMALL'
 # endif
       ENDIF
 
@@ -618,6 +627,8 @@ SUBROUTINE SEDIMENT_INITIAL
          WRITE(*,'(A60)')'You dont specify C_limiter, use FALSE'
          WRITE(3,'(A60)')'You dont specify C_limiter, use FALSE'
 # endif
+      ELSE
+       USE_CLIMITER = .TRUE.
       ENDIF
 
       CALL READ_LOGICAL(IN_Mask_s,FILE_NAME,'Hard_bottom',ierr)
@@ -721,7 +732,7 @@ SUBROUTINE SEDIMENT_INITIAL
       WRITE(3,*) 'BedLoad:  ', BedLoad
       WRITE(3,*) 'Porosity:  ', n_porosity
       WRITE(3,*) 'Settling velocity: calculated based on formula '
-      WRITE(3,*) 'Morph_step:  ', Morph_step
+      WRITE(3,*) 'Morph_interval:  ', Morph_interval
       WRITE(3,*) 'Morph_factor:  ', Morph_factor
       WRITE(3,*) 'Avalanche:  ', Avalanche
       WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
@@ -740,7 +751,7 @@ SUBROUTINE SEDIMENT_INITIAL
       WRITE(3,*) 'Settling velocity Ws: ', WS
       WRITE(3,*) 'Critical Shields number:  ', Shields_cr
       WRITE(3,*) 'Critical Shields number for bedload:  ', Shields_cr_bedload
-      WRITE(3,*) 'Morph_step:  ', Morph_step
+      WRITE(3,*) 'Morph_interval:  ', Morph_interval
       WRITE(3,*) 'Morph_factor:  ', Morph_factor
       WRITE(3,*) 'Avalanche:  ', Avalanche
       WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
@@ -773,7 +784,7 @@ SUBROUTINE SEDIMENT_INITIAL
       WRITE(3,*) 'BedLoad:  ', BedLoad
       WRITE(3,*) 'Porosity:  ', n_porosity
       WRITE(3,*) 'Settling velocity: calculated based on formula '
-      WRITE(3,*) 'Morph_step:  ', Morph_step
+      WRITE(3,*) 'Morph_interval:  ', Morph_interval
       WRITE(3,*) 'Morph_factor:  ', Morph_factor
       WRITE(3,*) 'Avalanche:  ', Avalanche
       WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
@@ -792,7 +803,7 @@ SUBROUTINE SEDIMENT_INITIAL
       WRITE(3,*) 'Settling velocity Ws: ', WS
       WRITE(3,*) 'Critical Shields number:  ', Shields_cr
       WRITE(3,*) 'Critical Shields number for bedload:  ', Shields_cr_bedload
-      WRITE(3,*) 'Morph_step:  ', Morph_step
+      WRITE(3,*) 'Morph_interval:  ', Morph_interval
       WRITE(3,*) 'Morph_factor:  ', Morph_factor
       WRITE(3,*) 'Avalanche:  ', Avalanche
       WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
@@ -815,6 +826,7 @@ SUBROUTINE SEDIMENT_INITIAL
         ALLOCATE(Mask_s(Mloc,Nloc))
         ALLOCATE(D(Mloc,Nloc),Pickup(Mloc,Nloc))
         ALLOCATE(Delta_c(Mloc,Nloc),D_ave(Mloc,Nloc),P_ave(Mloc,Nloc))
+        ALLOCATE(D_sum(Mloc,Nloc),P_sum(Mloc,Nloc))
         ALLOCATE(FsL(Mloc1,Nloc),FsR(Mloc1,Nloc), &
                  GsL(Mloc,Nloc1),GsR(Mloc,Nloc1))
         ALLOCATE(Gs(Mloc,Nloc1),Fs(Mloc1,Nloc),CH0(Mloc,Nloc))
@@ -823,7 +835,14 @@ SUBROUTINE SEDIMENT_INITIAL
                  TotalSuspendLoad(Mloc,Nloc),TotalBedLoad(Mloc,Nloc))
         ALLOCATE(BedFluxX(Mloc,Nloc),BedFluxY(Mloc,Nloc),Depth_ini(Mloc,Nloc))
         ALLOCATE(Tau_xy(Mloc,Nloc))
+        ALLOCATE(Aval_accum(Mloc,Nloc))
+#if defined (SEDIMENT_DEBUG)
+        ALLOCATE(Cb_debug(Mloc,Nloc),Ca_debug(Mloc,Nloc),Reduct_debug(Mloc,Nloc), &
+                 Tau_extra(Mloc,Nloc))
+# endif 
 
+
+        T_sum_sediment = ZERO
         Depth_ini = Depth
         ava=ZERO
         Zs=LARGE		
@@ -855,6 +874,8 @@ SUBROUTINE SEDIMENT_INITIAL
         Pickup=ZERO
         D_ave=ZERO
         P_ave=ZERO
+        D_sum=ZERO
+        P_sum=ZERO
         Delta_c=ZERO
         Mask_s=ZERO
         Zb=ZERO	
@@ -863,6 +884,7 @@ SUBROUTINE SEDIMENT_INITIAL
         TotalBedLoad = ZERO	
         BedFluxX = ZERO
         BedFluxY = ZERO
+        Aval_accum = ZERO
 
 ! sediment parameters 
      IF (CohesiveSediment) THEN
@@ -1139,13 +1161,9 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
     IF(MASK(I,J).GT.0.AND.H(I,J)>MinDepthPickup)THEN
           u_c=SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J))
 
-! avoid sheet flow condition
-          fr=SQRT(H(I,J)*grav)*0.5
-          IF(u_c > fr) u_c = fr
+    ! note rho_w is removed, also removed in tau_cr
 
-    ! note rho_w is removed, also removed in tau_cr, 
-
-          Tau_xy(I,J)= 0.16_SP/(1.0+log(k_s/(30.0_SP*Hpo(I+1,J))))**2*(u_c**2.)	
+          Tau_xy(I,J)= 0.16_SP/(1.0+log(k_s/(30.0_SP*Hpo(I,J))))**2*(u_c**2.)	
 
        IF (CohesiveSediment)THEN
 
@@ -1162,7 +1180,16 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
        ELSE ! non-cohesive
 
 !  suspended load, Babak set a reduction here, I made it optional fyshi 07/07/2023
+
+#if defined (SEDIMENT_DEBUG)
+            Tau_extra(I,J)=0.0_SP
+# endif
           IF (Tau_xy(I,J).GT.Tau_cr) THEN
+
+#if defined (SEDIMENT_DEBUG)
+            Tau_extra(I,J)=Tau_xy(I,J)-Tau_cr
+# endif
+
             c_b=0.015_SP*(((Tau_xy(I,J)-Tau_cr)/Tau_cr)**1.5_SP)*Dstar**(-0.3_SP)
             IF(PickupReduction)THEN
               ! default ReductionParameter = 0.65
@@ -1173,9 +1200,12 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
             c_a=reduction*c_b*D50/(MAX(0.01_SP*Hpo(I,J),0.01_SP*MinDepthPickup))
             Pickup(I,J)=MAX(0.0_SP,c_a*WS)
 
-! satuation this doesnt make sense, remove it
-!            IF(Pickup(I,J)*DT*0.3333_SP/Hpo(I,J)>=Satuation)  &
-!               Pickup(I,J)=Satuation*Hpo(I,J)*3.0_SP/DT
+#if defined (SEDIMENT_DEBUG)
+             Cb_debug(I,J) = c_b
+             Ca_debug(I,J) = reduction*c_b
+             Reduct_debug(I,J) = reduction
+# endif 
+
 
           ELSE
             Pickup(I,J)=0.0_SP
@@ -1246,6 +1276,23 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
         ENDIF ! mask
       ENDDO
       ENDDO
+
+
+! calculate average
+
+      T_sum_sediment = T_sum_sediment +DT
+      IF(T_sum_sediment.GE.Morph_interval)THEN
+        P_sum = P_sum + Pickup*DT
+        D_sum = D_sum + D*DT    
+        P_ave = P_sum / T_sum_sediment
+        D_ave = D_sum / T_sum_sediment
+        T_sum_sediment = 0.0
+        P_sum = 0.0
+        D_sum = 0.0
+      ELSE
+        P_sum = P_sum + Pickup*DT
+        D_sum = D_sum + D*DT     
+      ENDIF
 
       DEALLOCATE(Scalx,Scaly)
 
@@ -1340,7 +1387,9 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 
     DO J=Jbeg,Jend
     DO I=Ibeg,Iend
-      TotalSuspendLoad(I,J) = TotalSuspendLoad(I,J)+(-Pickup(I,J)+D(I,J))*DT
+!      TotalSuspendLoad(I,J) = TotalSuspendLoad(I,J)+(-Pickup(I,J)+D(I,J))*DT
+! use averaged value
+      TotalSuspendLoad(I,J) = TotalSuspendLoad(I,J)+(-P_ave(I,J)+D_ave(I,J))*DT
 # if defined (CARTESIAN)
       TotalBedLoad(I,J) = TotalBedLoad(I,J)  &
                     -(BedFluxX(I+1,J)-BedFluxX(I-1,J))/2.0_SP/DX*DT  &
@@ -1361,8 +1410,12 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 
 ! avalanching
     IF(Avalanche)THEN
+    Zb_avalanching = ZERO
     DO J=Jbeg,Jend
     DO I=Ibeg,Iend
+    ! only take care positive slope, lower point, assume the only on point reaches 
+    ! the avalanche condition to avoid dead-loop
+
 # if defined(CARTESIAN)
         slope4(1)=(Depth(I,J)-Depth(I-1,J))/DX
         slope4(2)=(Depth(I,J)-Depth(I+1,J))/DX
@@ -1391,8 +1444,8 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 # else
               dh=0.5_SP*(Depth(I,J)-Depth(I-1,J))-0.5_SP*Tan_phi*DX(I,J)
 # endif
-              Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
-              Zb_avalanching(I-1,J)=Zb_avalanching(I-1,J)-dh
+              Zb_avalanching(I,J)=dh
+              Zb_avalanching(I-1,J)=-dh
             ENDIF
           ENDIF
           IF(i4_record.EQ.2) THEN
@@ -1402,8 +1455,8 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 # else
               dh=0.5_SP*(Depth(I,J)-Depth(I+1,J))-0.5_SP*Tan_phi*DX(I,J)
 # endif
-              Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
-              Zb_avalanching(I+1,J)=Zb_avalanching(I+1,J)-dh
+              Zb_avalanching(I,J)=dh
+              Zb_avalanching(I+1,J)=-dh
             ENDIF
           ENDIF
           IF(i4_record.EQ.3) THEN
@@ -1413,8 +1466,8 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 # else
               dh=0.5_SP*(Depth(I,J)-Depth(I,J-1))-0.5_SP*Tan_phi*DY(I,J)
 # endif
-              Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
-              Zb_avalanching(I,J)=Zb_avalanching(I,J-1)-dh
+              Zb_avalanching(I,J)=dh
+              Zb_avalanching(I,J-1)=-dh
             ENDIF
           ENDIF
           IF(i4_record.EQ.4) THEN
@@ -1424,14 +1477,15 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 # else
               dh=0.5_SP*(Depth(I,J)-Depth(I,J+1))-0.5_SP*Tan_phi*DY(I,J)
 # endif
-              Zb_avalanching(I,J)=Zb_avalanching(I,J)+dh
-              Zb_avalanching(I,J)=Zb_avalanching(I,J+1)-dh
+              Zb_avalanching(I,J)=dh
+              Zb_avalanching(I,J+1)=-dh
             ENDIF
           ENDIF 
         ENDIF ! > tan_phi
     ENDDO
     ENDDO
-      Zb = Zb + Zb_avalanching
+      Zb = Zb - Zb_avalanching
+      Aval_accum = Aval_accum + Zb_avalanching
     ENDIF
 ! end avalanche
 
@@ -1466,6 +1520,8 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
 
 
 END SUBROUTINE MORPHOLOGICAL_CHANGE
+
+
 
 
 END MODULE SEDIMENT_MODULE
