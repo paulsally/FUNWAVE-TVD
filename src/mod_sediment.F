@@ -111,7 +111,7 @@ MODULE SEDIMENT_MODULE
     REAL(SP) :: u_c1,u_c2,u_c3,u_c4,ustar_c1,ustar_c2,ustar_c3,ustar_c4
     REAL(SP) :: k1,k2,k3,k4,F1,F2,F3,F4,tan_phi,Dstar,viscosity
     REAL(SP) :: Satuation
-    REAL(SP) :: Morph_interval
+    REAL(SP) :: Morph_interval,Aval_interval,T_aval
 #if defined (SEDIMENT_DEBUG)
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Cb_debug,Ca_debug,Reduct_debug, &
                            Tau_extra
@@ -570,6 +570,21 @@ SUBROUTINE SEDIMENT_INITIAL
 # endif
       ENDIF
 
+      CALL READ_Float(Aval_interval,FILE_NAME,'Aval_interval',ierr)
+
+      IF(ierr==1)THEN
+        Aval_interval = SMALL
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A60)')'You dont specify Aval_interval, use default: SMALL'
+         WRITE(3,'(A60)')'You dont specify Aval_interval, use default: SMALL'
+      endif
+# else
+         WRITE(*,'(A60)')'You dont specify Aval_interval, use default: SMALL'
+         WRITE(3,'(A60)')'You dont specify Aval_interval, use default: SMALL'
+# endif
+      ENDIF
+
       CALL READ_INTEGER(Morph_factor,FILE_NAME,'Morph_factor',ierr)
 
       IF(ierr==1)THEN
@@ -735,6 +750,7 @@ SUBROUTINE SEDIMENT_INITIAL
       WRITE(3,*) 'Porosity:  ', n_porosity
       WRITE(3,*) 'Settling velocity: calculated based on formula '
       WRITE(3,*) 'Morph_interval:  ', Morph_interval
+      WRITE(3,*) 'Aval_interval:  ', Aval_interval
       WRITE(3,*) 'Morph_factor:  ', Morph_factor
       WRITE(3,*) 'Avalanche:  ', Avalanche
       WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
@@ -758,6 +774,7 @@ SUBROUTINE SEDIMENT_INITIAL
       WRITE(3,*) 'Critical Shields number:  ', Shields_cr
       WRITE(3,*) 'Critical Shields number for bedload:  ', Shields_cr_bedload
       WRITE(3,*) 'Morph_interval:  ', Morph_interval
+      WRITE(3,*) 'Aval_interval:  ', Aval_interval
       WRITE(3,*) 'Morph_factor:  ', Morph_factor
       WRITE(3,*) 'Avalanche:  ', Avalanche
       WRITE(3,*) 'Tan_phi for Avalanche:  ', Tan_phi
@@ -842,6 +859,7 @@ SUBROUTINE SEDIMENT_INITIAL
         BedFluxX = ZERO
         BedFluxY = ZERO
         Aval_accum = ZERO
+        T_aval = ZERO
 
 ! sediment parameters 
      IF (CohesiveSediment) THEN
@@ -1379,7 +1397,11 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
     ENDDO
 
 ! avalanching
-    IF(Avalanche)THEN
+  IF(Avalanche)THEN
+    T_aval = T_aval + DT
+    IF(T_aval.GE.Aval_interval)THEN
+    T_aval = ZERO
+
     Zb_avalanching = ZERO
     DO J=Jbeg,Jend
     DO I=Ibeg,Iend
@@ -1456,7 +1478,9 @@ SUBROUTINE MORPHOLOGICAL_CHANGE
     ENDDO
       Zb = Zb - Zb_avalanching
       Aval_accum = Aval_accum + Zb_avalanching
-    ENDIF
+
+    ENDIF  ! end aval_interval
+  ENDIF 
 ! end avalanche
 
 ! update depth
