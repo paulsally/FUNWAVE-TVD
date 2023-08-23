@@ -70,12 +70,16 @@ MODULE SEDIMENT_MODULE
     CHARACTER(LEN=80) Mask_s_FILE
     CHARACTER(LEN=80) Sed_Scheme
 
-    LOGICAL :: Bed_Change=.FALSE.
-    LOGICAL :: Avalanche=.FALSE.
-    LOGICAL :: IN_Mask_s=.FALSE.
+    LOGICAL :: Bed_Change= .FALSE.
+    LOGICAL :: Avalanche= .FALSE.
+    LOGICAL :: IN_Mask_s= .FALSE.
     LOGICAL :: BedLoad = .FALSE.
     LOGICAL :: PickupReduction = .TRUE.
     LOGICAL :: WS_formula = .FALSE.
+
+    LOGICAL :: SedimentMassSource = .FALSE.
+    LOGICAL :: SedimentMomentDC = .FALSE.
+    LOGICAL :: SedimentMomentEXG = .FALSE.
 
     INTEGER :: Counter_s=0, Counter_ava=0
     INTEGER :: c_dum,Morph_factor
@@ -94,6 +98,8 @@ MODULE SEDIMENT_MODULE
     
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Zb,P_ave,D_ave,Mask_s,D,Pickup,Delta_c
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::P_sum,D_sum
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE::C_sum,C_ave
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE::DcX,DcY,ExgX,ExgY,MassSed
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::Zb_avalanching
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::CH,CHX,CHY,CHH,CHHxR,CHHxL,CHXxL,CHXxR
     REAL(SP),DIMENSION(:,:),ALLOCATABLE::CHHyR,CHHyL,CHYyL,CHYyR,ZbOld,dZb
@@ -155,6 +161,49 @@ SUBROUTINE SEDIMENT_INITIAL
          WRITE(3,'(A50)')'You dont specify Sed_Scheme, use Upwinding.'
 # endif
       ENDIF
+
+      CALL READ_LOGICAL(SedimentMomentEXG,FILE_NAME,'SedimentMomentEXG',ierr)
+      IF(ierr == 1)THEN
+       SedimentMomentEXG = .FALSE. 
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A40)')'SedimentMomentEXG not defined, Default: False'
+       WRITE(*,'(A40)')'SedimentMomentEXG not defined, Default: False'
+      endif
+# else
+      WRITE(3,'(A40)')'SedimentMomentEXG not defined, Default: False'
+      WRITE(*,'(A40)')'SedimentMomentEXG not defined, Default: False'
+# endif 
+      ENDIF
+
+      CALL READ_LOGICAL(SedimentMomentDC,FILE_NAME,'SedimentMomentDC',ierr)
+      IF(ierr == 1)THEN
+       SedimentMomentDC = .FALSE. 
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A40)')'SedimentMomentDC not defined, Default: False'
+       WRITE(*,'(A40)')'SedimentMomentDC not defined, Default: False'
+      endif
+# else
+      WRITE(3,'(A40)')'SedimentMomentDC not defined, Default: False'
+      WRITE(*,'(A40)')'SedimentMomentDC not defined, Default: False'
+# endif 
+      ENDIF
+
+      CALL READ_LOGICAL(SedimentMassSource,FILE_NAME,'SedimentMassSource',ierr)
+      IF(ierr == 1)THEN
+       SedimentMassSource = .FALSE. 
+# if defined (PARALLEL) 
+      if (myid.eq.0)then
+       WRITE(3,'(A40)')'SedimentMassSource not defined, Default: False'
+       WRITE(*,'(A40)')'SedimentMassSource not defined, Default: False'
+      endif
+# else
+      WRITE(3,'(A40)')'SedimentMassSource not defined, Default: False'
+      WRITE(*,'(A40)')'SedimentMassSource not defined, Default: False'
+# endif 
+      ENDIF
+
 
       CALL READ_LOGICAL(CohesiveSediment,FILE_NAME,'CohesiveSediment',ierr)
 
@@ -801,6 +850,10 @@ SUBROUTINE SEDIMENT_INITIAL
         ALLOCATE(D(Mloc,Nloc),Pickup(Mloc,Nloc))
         ALLOCATE(Delta_c(Mloc,Nloc),D_ave(Mloc,Nloc),P_ave(Mloc,Nloc))
         ALLOCATE(D_sum(Mloc,Nloc),P_sum(Mloc,Nloc))
+        ALLOCATE(C_sum(Mloc,Nloc),C_ave(Mloc,Nloc))
+        ALLOCATE(DcX(Mloc,Nloc),DcY(Mloc,Nloc),ExgX(Mloc,Nloc), &
+                 ExgY(Mloc,Nloc),MassSed(Mloc,Nloc))
+
         ALLOCATE(FsL(Mloc1,Nloc),FsR(Mloc1,Nloc), &
                  GsL(Mloc,Nloc1),GsR(Mloc,Nloc1))
         ALLOCATE(Gs(Mloc,Nloc1),Fs(Mloc1,Nloc),CH0(Mloc,Nloc))
@@ -850,6 +903,13 @@ SUBROUTINE SEDIMENT_INITIAL
         P_ave=ZERO
         D_sum=ZERO
         P_sum=ZERO
+        C_sum=ZERO
+        C_ave=ZERO
+        DcX = ZERO
+        DcY = ZERO
+        ExgX = ZERO
+        ExgY = ZERO
+        MassSed = ZERO
         Delta_c=ZERO
         Mask_s=ZERO
         Zb=ZERO	
@@ -934,7 +994,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
   REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Scalx,Scaly
   REAL(SP),DIMENSION(Ibeg:Iend,Jbeg:Jend)::R1,R2,R3
   REAL(SP) :: Weight0 = 0.9_SP, Weight1=0.1_SP
-  REAL(SP) :: Angle_cur,bedf,fr,Pd,Cb
+  REAL(SP) :: Angle_cur,bedf,fr,Pd,Cb,csc,snc,p_d
 
     ALLOCATE(Scalx(Mloc1,Nloc),Scaly(Mloc,Nloc1))
 
@@ -1270,17 +1330,57 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
       T_sum_sediment = T_sum_sediment +DT
       IF(T_sum_sediment.GE.Morph_interval)THEN
+        C_sum = C_sum + CH*DT
         P_sum = P_sum + Pickup*DT
         D_sum = D_sum + D*DT    
         P_ave = P_sum / T_sum_sediment
         D_ave = D_sum / T_sum_sediment
+        C_ave = C_sum / T_sum_sediment
         T_sum_sediment = 0.0
+        C_sum = 0.0
         P_sum = 0.0
         D_sum = 0.0
       ELSE
+        C_sum = C_sum + CH*DT
         P_sum = P_sum + Pickup*DT
         D_sum = D_sum + D*DT     
       ENDIF
+
+# if defined (PARALLEL)
+    CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,C_ave,1,PERIODIC)
+# endif
+
+! calculate extra terms in mass and momentum equations
+
+    IF(SedimentMassSource.OR.SedimentMomentDC.OR.SedimentMomentEXG) THEN
+
+      DO J=Jbeg,Jend
+      DO I=Ibeg,Iend
+
+       IF(MASK(I,J).GT.0)THEN
+# if defined (CARTESIAN)
+         DcX(I,J)=(C_ave(I+1,J)-C_ave(I-1,J))/2.0_SP/DX
+         DcY(I,J)=(C_ave(I,J+1)-C_ave(I,J-1))/2.0_SP/DY
+# else
+         DcX(I,J)=(C_ave(I+1,J)-C_ave(I-1,J))/2.0_SP/DX(I,J)
+         DcY(I,J)=(C_ave(I,J+1)-C_ave(I,J-1))/2.0_SP/DY(I,J)
+# endif
+         csc=1.0_SP + C_ave(I,J)*(Sdensity - 1.0_SP)
+
+       ! note 1-n-c should larger than 0
+         snc=(Sdensity-1.0_SP)*MAX(1.0_SP-n_porosity-C_ave(I,J),0.0_SP) 
+
+         p_d=Pickup(I,J) - D(I,J)
+
+         DcX(I,J)=-(Sdensity-1.0_SP)*grav*Hpo(I,J)**2 /csc *DcX(I,J)
+         DcY(I,J)=-(Sdensity-1.0_SP)*grav*Hpo(I,J)**2 /csc *DcY(I,J)
+         ExgX(I,J) = -snc/csc/(1.0_SP-n_porosity)*p_d*U(I,J)
+         ExgY(I,J) = -snc/csc/(1.0_SP-n_porosity)*p_d*V(I,J)
+         MassSed(I,J) = p_d/(1.0_SP-n_porosity)
+       ENDIF
+      ENDDO
+      ENDDO      
+     ENDIF ! source term true
 
       DEALLOCATE(Scalx,Scaly)
 

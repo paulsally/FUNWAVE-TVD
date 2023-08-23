@@ -253,3 +253,6 @@ MinDepthPickup = 0.001
 Avalanche = T
 Aval_interval = 1.0
 Morph_interval = 1.0
+SedimentMassSource = F
+SedimentMomentDC = F
+SedimentMomentEXG = F
