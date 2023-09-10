@@ -146,6 +146,9 @@ SUBROUTINE TIDE_INITIAL
        ENDIF ! true
       ENDIF
 
+!   tidal bc ---------
+   IF(TIDAL_BC_GEN_ABS.OR.TIDAL_BC_ABS)THEN
+
 ! input tide details
       CALL READ_STRING(TideBcType,FILE_NAME,'TideBcType',ierr)
       IF(ierr==1)THEN
@@ -196,6 +199,8 @@ SUBROUTINE TIDE_INITIAL
 
 
       CALL TIDE_SPONGE
+
+   ENDIF  ! end either tide abs or gen abs ---------------
 
     IF (TIDAL_BC_ABS) THEN
 

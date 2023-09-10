@@ -151,6 +151,9 @@ Program FUNWAVE_TVD
 # if defined (TRACKING)
      USE TRACER
 # endif
+# if defined (PRECIPITATION)
+     USE PRECIPITATION_MODULE
+# endif
 
      USE TIDE_MODULE
 
@@ -237,6 +240,10 @@ Program FUNWAVE_TVD
 # if defined (FOAM)
      CALL ALLOCATE_FOAM
      CALL INITIALIZATION_FOAM
+# endif
+
+#if defined (PRECIPITATION)
+     CALL PRECIPITATION_INITIAL
 # endif
 
 #if defined (TRACKING)
@@ -330,6 +337,10 @@ Program FUNWAVE_TVD
        IF(TideBcType(1:4)=='DATA')THEN
          CALL TIDE_DATA
        ENDIF
+
+#if defined (PRECIPITATION)
+     CALL PRECIPITATION_DISTRIBUTION
+# endif
 
      ! 3-ORDER RUNGE-KUTTA TIME STEPPING
      DO ISTAGE=1,3
