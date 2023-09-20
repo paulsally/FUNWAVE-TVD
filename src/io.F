@@ -4430,6 +4430,13 @@ SUBROUTINE PREVIEW
 # endif
    ! end panel source
 
+# if defined (PROPELLER)
+        TMP_NAME = TRIM(FDIR)//'VesUp_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,UpTotal)
+        TMP_NAME = TRIM(FDIR)//'VesVp_'//TRIM(FILE_NAME)
+        call PutFile(TMP_NAME,VpTotal)
+# endif
+
      ENDIF
 # endif
 

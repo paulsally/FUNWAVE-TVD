@@ -1,0 +1,197 @@
+ -------------- LOG FILE -----------------
+ FUNWAVE                                                                         
+  --------------input start --------------
+                                          
+ -------------- PARALLEL -----------------
+ PX   =  2 PY   =  2
+                                          
+ -------------- GRID INFO -----------------
+ Mglob=     480 Nglob=      60
+ DX=        2.00 DY=        2.00
+ DEPTH_TYPE:FLAT                                              
+DEPTH_FLAT       10.00
+                                          
+ -------------- TIME INFO -----------------
+         PLOT_START_TIME Default:  0.0 s
+                             StationOutputBuffer not specified, use default:1000
+ TOTAL_TIME=      500.00
+ PLOT_INTV=         5.00
+ SCREEN_INTV=        5.00
+                                          
+ -------------- HOT START -----------------
+                                          
+ -------------- STILL WATER INFO -----------------
+       WaterLevel =      0.00000
+                                          
+ -------------- WAVEMAKER -----------------
+ WAVEMAKER:nothing                                           
+          EqualEnergy NOT USED in frequency domain
+                                          
+ -------------- PERIODIC BC -----------------
+  PERIODIC: F
+                                          
+ -------------- SPONGE -----------------
+                   DIRECT_SPONGE IS USED
+                 FRICTION_SPONGE IS USED
+ FRICTION_SPONGE CDsponge=       10.00
+ Sponge_west_width =      200.00
+ Sponge_east_width =      100.00
+ Sponge_south_width=        0.00
+ Sponge_north_width=        0.00
+ R_sponge          =        0.85
+ A_sponge          =        5.00
+              No WavemakerCurrentBalance
+                                          
+ -------- OBSTACLE and BREAKWATER -----------------
+ OBSTACLE_FILE:   NO
+    BREAKWATER_FILE:   NO
+     BreakWaterAbsorbCoef Default:  10.0
+                                          
+ -------------- PHYSICS -----------------
+  Summary of Physics
+ Gamma1 =         1.00
+ Gamma2 =         1.00
+Beta_ref=        -0.53
+ Gamma3 =         1.00
+ VISCOSITY_BREAKING IS USED
+             Friction_Matrix Default:  constant Cd
+  Cd_fixed (if you used fixed Cd) =        0.00
+                                          
+ -------------- NUMERICS -----------------
+ TIME_SCHEME:Runge_Kutta                                       
+ CONSTRUCTION:HLLC                                              
+ HIGH_ORDER:FOURTH                                            
+ CFL=        0.50
+  FroudeCap=       10.00
+          USE MIN(MinDepthFrc, MinDepth)
+ MinDepth=    0.020000
+ MinDepthFrc=    0.020000
+                               Dont record wave arrival time
+                                          
+ --------- WAVE BREAKING -----------------
+                      ROLLER_EFFECT:  NO
+ Cbrk1 =    0.700000
+ Cbrk2 =    0.400000
+  WAVEMAKER_Cbrk =         0.025000
+                                          
+ -------- WAVE-AVERAGED PROPERTY -----------------
+ T_INTV_mean =   36.400002
+ STEADY_TIME =    9.100000
+ C_smg =    0.250000
+                                          
+ -------------- OUTPUT INFO -----------------
+ RESULT_FOLDER:output/                                           
+ FIELD_IO_TYPE = ASCII                                                                           
+         OUTPUT_RES NOT FOUND, OUTPUT_RES=1: full resolution
+     OUTPUT_RES         1
+      EtaBlowVal Default:  100xmax_depth
+      OUT_DEPTH T
+          OUT_U T
+          OUT_V T
+        OUT_ETA T
+       OUT_Hmax F
+       OUT_Hmin F
+       OUT_Umax F
+      OUT_MFmax F
+     OUT_VORmax F
+       OUT_MASK T
+      OUT_MASK9 F
+      OUT_Umean F
+      OUT_Vmean F
+    OUT_ETAmean F
+ OUT_WaveHeight F
+        OUT_SXL F
+        OUT_SXR F
+        OUT_SYL F
+        OUT_SYR F
+    OUT_SourceX F
+    OUT_SourceY F
+          OUT_P F
+          OUT_Q F
+         OUT_Fx F
+         OUT_Fy F
+         OUT_Gx F
+         OUT_Gy F
+        OUT_AGE F
+     OUT_ROLLER F
+   OUT_UNDERTOW F
+         OUT_NU F
+        OUT_TMP T
+       OUT_TIME F
+                                          
+  --------------input end --------------
+                                          
+                                        TIDAL_BC_ABS not defined, Default: False
+ VESSEL_FOLDER:vessel/                                           
+NumVessel =   2
+         PLOT_INTV_VESSEL not specified, use SMALL
+ ----- Vessel Name : Title: Vessel # 1
+ Vessel Source Type: PRESSURE
+ Vessel Type:            1
+ Vessel Length   20.0000000    
+ Vessel Width   10.0000000    
+ Vessel Alpha_1  0.500000000    
+ Vessel Alpha_2  0.500000000    
+ Vessel Beta  0.500000000    
+ Vessel P   3.00000000    
+ Initial Time, X, Y   0.00000000       100.000000       30.0000000    
+ Propeller effect used
+ N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct
+   1.60000002       3.70000005      0.479999989       1.10000002      0.550000012       2.50000000      0.189999998    
+ ----- Vessel Name : Title: Vessel # 2
+ Vessel Source Type: PRESSURE
+ Vessel Type:            1
+ Vessel Length   20.0000000    
+ Vessel Width   10.0000000    
+ Vessel Alpha_1  0.500000000    
+ Vessel Alpha_2  0.500000000    
+ Vessel Beta  0.500000000    
+ Vessel P   3.00000000    
+ Initial Time, X, Y   0.00000000       900.000000       60.0000000    
+ Propeller effect used
+ N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct
+   1.60000002       3.70000005      0.479999989       1.10000002      0.550000012       2.50000000      0.189999998    
+       You dont specify Sed_Scheme, use Upwinding.
+CohesiveSediment not defined, Default: F
+                            You dont specify WS, use formula
+               You dont specify Morph_factor, use default: 1
+            You dont specify Hard_bottom, use default: False
+                                      PLOT_INTV_SEDIMENT not specified, use SAME
+ ----- Sediment Parameters
+ Non-cohesive Sediment
+ D50:     1.19999997E-04
+ specific gravity of sediment, Sdensity    2.65000010    
+ Bed_Change:   T
+ Minimum Depth  for Pickup: MinDepthPickup     1.00000005E-03
+ BedLoad:   T
+ Porosity:    0.460000008    
+ Settling velocity Ws calculated by formula 
+ Critical Shields number:     5.00000007E-02
+ Critical Shields number for bedload:     5.00000007E-02
+ Morph_interval:     1.00000000    
+ Aval_interval:     1.00000000    
+ Morph_factor:             1
+ Avalanche:   T
+ Tan_phi for Avalanche:    0.699999988    
+ Hard_bottom:   F
+ ----- end sedment parameters  
+ Calculated Settling velocity Ws:    6.98882490E-02
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.0000E+00  0.0000E+00
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+  0.0000E+00  0.5651E+08  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.0000E+00  0.4429E+00  0.0000E+00  0.0000E+00
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     0  TIME/TOTAL:        0.000 /     500.000
+ Read Vessel #            1
+ T,X,Y =    25523.0000       180040.000       100.000000    
+ Read Vessel #            2
+ T,X,Y =    1000.00000      -4100.00000       60.0000000    
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.5043E+01  0.9289E-01
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.1184E+03  0.5650E+08  0.7683E+00 -0.3590E+01  0.5095E+00  0.4254E+00

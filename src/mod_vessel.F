@@ -97,6 +97,13 @@ MODULE VESSEL_MODULE
     REAL(SP),DIMENSION(:,:),ALLOCATABLE :: CdVessel_2D,VisVessel_2D
      INTEGER,DIMENSION(:,:),ALLOCATABLE :: MaskVessel
 # endif
+
+# if defined (PROPELLER)
+    REAL(SP),DIMENSION(:),ALLOCATABLE :: N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Up,Vp,UpTotal,VpTotal
+    REAL(SP),DIMENSION(:),ALLOCATABLE :: Veff,Cf,IZEF
+    REAL(SP) :: E0
+# endif
   
     LOGICAL :: MakeVesselDraft = .TRUE.
 
@@ -267,6 +274,13 @@ SUBROUTINE VESSEL_INITIAL
                 Gz(Mloc,Nloc))
       ALLOCATE (Uvel(NumVessel),Vvel(NumVessel))
       ALLOCATE (SourceType(NumVessel),VesselType(NumVessel))
+
+# if defined (PROPELLER)
+     ALLOCATE (N_revolution(NumVessel),D_prop(NumVessel), C_thrust(NumVessel), &
+               D_hub(NumVessel), BAR(NumVessel), H_prop(NumVessel), C_duct(NumVessel), &
+               Veff(NumVessel),Cf(NumVessel),IZEF(NumVessel))
+     ALLOCATE (Up(Mloc,Nloc),Vp(Mloc,Nloc),UpTotal(Mloc,Nloc),VpTotal(Mloc,Nloc))
+# endif
       
       Gz = ZERO
       Uvel = ZERO
@@ -336,6 +350,13 @@ SUBROUTINE VESSEL_INITIAL
          READ(Ifile,*)  LengthVessel(Kves), WidthVessel(Kves), &
                       AlphaVessel1(Kves),AlphaVessel2(Kves), &
                       BetaVessel(Kves),Pvessel(Kves)
+# if defined (PROPELLER)
+         READ(Ifile,*) !
+         READ(Ifile,*) N_revolution(Kves),D_prop(Kves), C_thrust(Kves), &
+                       D_hub(Kves), BAR(Kves), H_prop(Kves), C_duct(Kves)
+# endif
+
+
 !                for type 2 divid and volker 2017, alpha1 is cl,alpha2 is cb
 !                beta is a
 
@@ -372,6 +393,7 @@ SUBROUTINE VESSEL_INITIAL
 
 # if defined (PARALLEL)
    IF(MYID==0)THEN
+# endif
    WRITE(3,*) '----- Vessel Name : ',  TRIM(VesselName)
    WRITE(3,*) 'Vessel Source Type: ',  TRIM(SourceType(Kves))
    WRITE(3,*) 'Vessel Type: ',  VesselType(Kves)
@@ -382,17 +404,48 @@ SUBROUTINE VESSEL_INITIAL
    WRITE(3,*) 'Vessel Beta', BetaVessel(Kves)
    WRITE(3,*) 'Vessel P', PVessel(Kves)
    WRITE(3,*) 'Initial Time, X, Y', TimeVessel2(Kves),Xvessel2(Kves),Yvessel2(Kves)
+
+   WRITE(*,*) '----- Vessel Name : ',  TRIM(VesselName)
+   WRITE(*,*) 'Vessel Source Type: ',  TRIM(SourceType(Kves))
+   WRITE(*,*) 'Vessel Type: ',  VesselType(Kves)
+   WRITE(*,*) 'Vessel Length', LengthVessel(Kves)
+   WRITE(*,*) 'Vessel Width', WidthVessel(Kves)
+   WRITE(*,*) 'Vessel Alpha_1', AlphaVessel1(Kves)
+   WRITE(*,*) 'Vessel Alpha_2', AlphaVessel2(Kves)
+   WRITE(*,*) 'Vessel Beta', BetaVessel(Kves)
+   WRITE(*,*) 'Vessel P', PVessel(Kves)
+   WRITE(*,*) 'Initial Time, X, Y', TimeVessel2(Kves),Xvessel2(Kves),Yvessel2(Kves)
+# if defined (PARALLEL)
    ENDIF
-# else
-   WRITE(3,*) 'Vessel Source Type: ',  TRIM(SourceType(Kves))
-   WRITE(3,*) 'Vessel Type: ',  VesselType(Kves)
-   WRITE(3,*) 'Vessel Length', LengthVessel(Kves)
-   WRITE(3,*) 'Vessel Width', WidthVessel(Kves)
-   WRITE(3,*) 'Vessel Alpha_1', AlphaVessel1(Kves)
-   WRITE(3,*) 'Vessel Alpha_2', AlphaVessel2(Kves)
-   WRITE(3,*) 'Vessel Beta', BetaVessel(Kves)
-   WRITE(3,*) 'Vessel P', PVessel(Kves)
-   WRITE(3,*) 'Initial Time, X, Y', TimeVessel2(Kves),Xvessel2(Kves),Yvessel2(Kves)
+# endif
+
+
+# if defined (PROPELLER)
+
+# if defined (PARALLEL)
+   IF(MYID==0)THEN
+# endif
+         WRITE(3,*) 'Propeller effect used'
+         WRITE(3,*)'N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct'
+         WRITE(3,*) N_revolution(Kves),D_prop(Kves), C_thrust(Kves), &
+                    D_hub(Kves), BAR(Kves), H_prop(Kves), C_duct(Kves)
+         WRITE(*,*) 'Propeller effect used'
+         WRITE(*,*)'N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct'
+         WRITE(*,*) N_revolution(Kves),D_prop(Kves), C_thrust(Kves), &
+                    D_hub(Kves), BAR(Kves), H_prop(Kves), C_duct(Kves)
+# if defined (PARALLEL)
+   ENDIF
+# endif
+
+# endif
+
+# if defined (PROPELLER)
+     E0 = (D_prop(Kves)/D_hub(Kves))**(-0.403_SP)*C_thrust(Kves)**(-1.79_SP) &
+                 *BAR(Kves)**(0.744_SP)
+     Veff(Kves) = E0*N_revolution(Kves)*D_prop(Kves)*SQRT(C_thrust(Kves))
+     Cf(Kves) = 0.01_SP*(D_prop(Kves)/H_prop(Kves))
+     IZEF(Kves) = D_prop(Kves)/2.0_SP/C_duct(Kves)
+
 # endif
 
   ENDDO  ! end Kves
@@ -407,8 +460,11 @@ SUBROUTINE VESSEL_FORCING
 
 
   VesselFluxGradient = ZERO
-
   VesselPressureTotal = ZERO
+# if defined (PROPELLER)
+  UpTotal = ZERO
+  VpTotal = ZERO
+# endif
 
   DO Kves = 1,NumVessel
 
@@ -473,6 +529,11 @@ SUBROUTINE VESSEL_FORCING
 
      CALL PRESSURE_SOURCE (Xves,Yves)
     VesselPressureTotal = VesselPressureTotal+VesselPressureEach
+
+# if defined (PROPELLER)
+    UpTotal = UpTotal + Up
+    VpTotal = VpTotal + Vp
+# endif
 
    ENDIF
 
@@ -565,6 +626,11 @@ SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
   IMPLICIT NONE
   INTEGER :: ierr,I,J
   REAL(SP) :: Xves,Yves,Lves,Wves
+
+# if defined (PROPELLER)
+  REAL(SP) :: Xrear,Yrear,Lrear,Wrear,UUp
+# endif
+
 #if defined (PARALLEL)
     REAL(SP) :: myvar
 # endif  
@@ -577,11 +643,21 @@ SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
     ResNegX(Kves) = ZERO
     ResPosY(Kves) = ZERO
     ResNegY(Kves) = ZERO
+  
+# if defined (PROPELLER)
+   Xrear = Xves - LengthVessel(Kves) * COS(ThetaVessel(Kves))
+   Yrear = Yves - LengthVessel(Kves) * SIN(ThetaVessel(Kves))
+# endif    
 
     DO J=1,Nloc
     DO I=1,Mloc
       Lves=(Xco(I)-Xves)*COS(ThetaVessel(Kves)) + (Yco(J)-Yves)*SIN(ThetaVessel(Kves))
       Wves=-(Xco(I)-Xves)*SIN(ThetaVessel(Kves)) + (Yco(J)-Yves)*COS(ThetaVessel(Kves))
+
+# if defined (PROPELLER)
+      Lrear=(Xco(I)-Xrear)*COS(ThetaVessel(Kves)) + (Yco(J)-Yrear)*SIN(ThetaVessel(Kves))
+      Wrear=-(Xco(I)-Xrear)*SIN(ThetaVessel(Kves)) + (Yco(J)-Yrear)*COS(ThetaVessel(Kves))     
+# endif
 
    ! Ertekin et al. JFM 1986
 
@@ -629,6 +705,22 @@ SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
      ENDIF ! end type 2     
 
     ENDIF  ! end inside ship rectangule
+
+# if defined (PROPELLER)
+       IF(Lrear<ZERO) THEN
+
+          IF(Lrear > -IZEF(Kves))THEN
+           UUp = Veff(Kves)*EXP(-2.0_SP*(Wrear**2+H_prop(Kves)**2)/D_prop(Kves)**2)
+          ELSE
+           UUp = Veff(Kves)*D_prop(Kves)/2.0_SP/C_thrust(Kves)/ABS(Lrear) &
+               *EXP(-(Wrear**2+H_prop(Kves)**2)/2.0_SP/C_thrust(Kves)**2/Lrear**2)
+          ENDIF
+       ELSE
+         UUp = ZERO
+       ENDIF
+       Up(I,J) = -UUp*COS(ThetaVessel(Kves))
+       Vp(I,J) = -UUp*SIN(ThetaVessel(Kves))
+# endif
      
     ENDDO
     ENDDO  ! end grid
