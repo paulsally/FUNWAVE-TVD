@@ -626,7 +626,7 @@ SUBROUTINE VESSEL_FORCING
 # if defined (PARALLEL)
 # if defined (PROPELLER)
     VTYPE=1
-    CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,Upc,VTYPE,PERIODIC)    
+    CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,UpcTotal,VTYPE,PERIODIC)    
 # endif
 # endif
 
