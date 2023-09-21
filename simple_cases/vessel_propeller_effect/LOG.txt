@@ -6,7 +6,7 @@
  PX   =  2 PY   =  2
                                           
  -------------- GRID INFO -----------------
- Mglob=     480 Nglob=      60
+ Mglob=     500 Nglob=     120
  DX=        2.00 DY=        2.00
  DEPTH_TYPE:FLAT                                              
 DEPTH_FLAT       10.00
@@ -14,8 +14,8 @@ DEPTH_FLAT       10.00
  -------------- TIME INFO -----------------
          PLOT_START_TIME Default:  0.0 s
                              StationOutputBuffer not specified, use default:1000
- TOTAL_TIME=      500.00
- PLOT_INTV=         5.00
+ TOTAL_TIME=       80.00
+ PLOT_INTV=         1.00
  SCREEN_INTV=        5.00
                                           
  -------------- HOT START -----------------
@@ -34,10 +34,10 @@ DEPTH_FLAT       10.00
                    DIRECT_SPONGE IS USED
                  FRICTION_SPONGE IS USED
  FRICTION_SPONGE CDsponge=       10.00
- Sponge_west_width =      200.00
+ Sponge_west_width =      100.00
  Sponge_east_width =      100.00
- Sponge_south_width=        0.00
- Sponge_north_width=        0.00
+ Sponge_south_width=       20.00
+ Sponge_north_width=       20.00
  R_sponge          =        0.85
  A_sponge          =        5.00
               No WavemakerCurrentBalance
@@ -147,7 +147,7 @@ NumVessel =   2
  Vessel Alpha_2  0.500000000    
  Vessel Beta  0.500000000    
  Vessel P   3.00000000    
- Initial Time, X, Y   0.00000000       900.000000       60.0000000    
+ Initial Time, X, Y   0.00000000       900.000000       210.000000    
  Propeller effect used
  N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct
    1.60000002       3.70000005      0.479999989       1.10000002      0.550000012       2.50000000      0.189999998    
@@ -180,18 +180,17 @@ CohesiveSediment not defined, Default: F
   TIME        DT
   0.0000E+00  0.0000E+00
   MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
-  0.0000E+00  0.5651E+08  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+  0.0000E+00  0.1177E+09  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
   MaxTotalU   PhaseS      Froude      WetDryMass
   0.0000E+00  0.4429E+00  0.0000E+00  0.0000E+00
   TideWest    TideEast      TideSouth    TideNorth
   0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-   PRINTING FILE NO.     0  TIME/TOTAL:        0.000 /     500.000
+   PRINTING FILE NO.     0  TIME/TOTAL:        0.000 /      80.000
  Read Vessel #            1
- T,X,Y =    25523.0000       180040.000       100.000000    
+ T,X,Y =    100.000000       1100.00000       210.000000    
  Read Vessel #            2
- T,X,Y =    1000.00000      -4100.00000       60.0000000    
- ----------------- STATISTICS ----------------
-  TIME        DT
-  0.5043E+01  0.9289E-01
-  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
- -0.1184E+03  0.5650E+08  0.7683E+00 -0.3590E+01  0.5095E+00  0.4254E+00
+ T,X,Y =    100.000000      -100.000000       30.0000000    
+   PRINTING FILE NO.     1  TIME/TOTAL:        1.084 /      80.000
+   PRINTING FILE NO.     2  TIME/TOTAL:        2.024 /      80.000
+   PRINTING FILE NO.     3  TIME/TOTAL:        3.031 /      80.000
+   PRINTING FILE NO.     4  TIME/TOTAL:        4.008 /      80.000

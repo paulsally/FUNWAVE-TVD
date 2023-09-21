@@ -1,89 +1,92 @@
 clear all
-fdir='/Volumes/Seagate Backup Plus Drive/VESSEL_MORPHO/results/single_vessel_fr_13/';
+fdir='output/';
 
 
 dep=load([fdir 'dep_00000']);
 
 [n,m]=size(dep);
-N=2*n-1;
-M=m;
 
-dx=1.0;
-dy=1.0;
-x=[0:M-1]*dx;
-y=[0:N-1]*dy;
+dx=2.0;
+dy=2.0;
+x=[0:m-1]*dx;
+y=[0:n-1]*dy;
 
 
 
-nfile=[40 80 120];
+nfile=[1:1:75];
 
-min={'80' '160' '240'};
+
+myVideo = VideoWriter('videoOut.mp4','MPEG-4');
+myVideo.FrameRate = 10;  
+myVideo.Quality = 100;
+%vidHeight = 576; %this is the value in which it should reproduce
+%vidWidth = 1024; %this is the value in which it should reproduce
+open(myVideo);
 
 wid=8;
 len=8;
 set(gcf,'units','inches','paperunits','inches','papersize', [wid len],'position',[1 1 wid len],'paperposition',[0 0 wid len]);
 clf
-
-ETA=zeros([N M]);
-CH=zeros([N M]);
-
-[ha, pos] = tight_subplot(6,1,[.05 0.5],[.1 .05],[.1 .1]) 
-ax=[0 4500 0 120];
+colormap jet
 
 for num=1:length(nfile)
     
 fnum=sprintf('%.5d',nfile(num));
 eta=load([fdir 'eta_' fnum]);
-mask=load([fdir 'mask_' fnum]);
 ch=load([fdir 'C_' fnum]);
+ds=load([fdir 'DchgS_' fnum]);
+db=load([fdir 'DchgB_' fnum]);
 
-eta(mask<1)=NaN;
-ch(mask<1)=NaN;
-
-
-ETA(1:n,:)=eta(:,:);
-ETA(n+1:end,:)=eta(n-1:-1:1,:);
-CH(1:n,:)=ch(:,:);
-CH(n+1:end,:)=ch(n-1:-1:1,:);
-
-
-%subplot(1,length(nfile), num)
-%subplot(6,1,2*(num-1)+1)
-
-axes(ha(2*(num-1)+1));
-
-pcolor(x,y,ETA),shading flat
+subplot(411)
+pcolor(x,y,eta),shading flat
 hold on
-caxis([-0.3 1.0])
-title([' Time = ' min{num} ' sec '])
-axis(ax)
+caxis([-0.3 1.5])
+title([' Time = ' num2str(nfile(num)*1.0) ' sec '])
 
 cbar=colorbar;
 set(get(cbar,'ylabel'),'String',' \eta (m) ')
 
+
+%xlabel(' x (m) ')
 ylabel(' y (m) ')
 
-%subplot(6,1,2*(num-1)+2)
-axes(ha(2*(num-1)+2));
-
-pcolor(x,y,log10(CH*2680*1000.0)),shading flat
-caxis([0 2.999])
-
-%title([' Time = ' min{num} ' sec '])
+subplot(412)
+pcolor(x,y,ch*100),shading flat
+hold on
+caxis([0.0 0.01])
 cbar=colorbar;
-set(get(cbar,'ylabel'),'String',' log10(C) (mg/L) ')
-axis(ax)
+set(get(cbar,'ylabel'),'String',' c (%) ')
 
-if num==length(nfile)
-xlabel(' x (m) ')
-end
 
+%xlabel(' x (m) ')
 ylabel(' y (m) ')
 
 
-%cbar=colorbar;
-%set(get(cbar,'ylabel'),'String','\eta (m) ')
+subplot(413)
+pcolor(x,y,ds),shading flat
+hold on
+caxis([-0.002 0.002])
+cbar=colorbar;
+set(get(cbar,'ylabel'),'String',' S-load-induced (m) ')
+%xlabel(' x (m) ')
+ylabel(' y (m) ')
 
+subplot(414)
+pcolor(x,y,db),shading flat
+hold on
+caxis([-0.002 0.002])
+cbar=colorbar;
+set(get(cbar,'ylabel'),'String',' B-load-induced (m) ')
+xlabel(' x (m) ')
+ylabel(' y (m) ')
+
+
+pause(0.1)
+
+F = print('-RGBImage','-r300');
+mov(num).cdata = F;
+
+writeVideo(myVideo,mov(num).cdata);
 
 end
-%print -djpeg eta_inlet_shoal_irr.jpg
+close(myVideo)

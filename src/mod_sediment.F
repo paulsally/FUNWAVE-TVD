@@ -64,6 +64,9 @@ MODULE SEDIMENT_MODULE
   USE GLOBAL,ONLY : myid,ier, npx,npy,PX,PY
   USE MPI
 # endif
+# if defined (VESSEL)
+  USE VESSEL_MODULE, ONLY : UpcTotal,UpTotal,VpTotal
+# endif
   IMPLICIT NONE
   SAVE
 
@@ -1120,11 +1123,24 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
        IF(MASK(I,J).GT.0)THEN
             u_c =SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J))
+# if defined (PROPELLER) && defined (VESSEL)
+            ustar_c = 0.4_SP*u_c/(-1.0_SP+log(30.0_SP*Hpo(I,J)/k_s)) &
+             + UpcTotal(I,J)
+# else
             ustar_c = 0.4_SP*u_c/(-1.0_SP+log(30.0_SP*Hpo(I,J)/k_s))
+# endif
+
 ! diffusion x
          IF(MASK(I-1,J).GT.0)THEN
-            u_c2=SQRT(U(I-1,J)*U(I-1,J)+V(I-1,J)*V(I-1,J))				
-            ustar_c2= 0.4_SP*u_c2/(-1.0_SP+log(30.0_SP*Hpo(I-1,J)/k_s))			              
+            u_c2=SQRT(U(I-1,J)*U(I-1,J)+V(I-1,J)*V(I-1,J))	
+
+# if defined (PROPELLER) && defined (VESSEL)
+            ustar_c2= 0.4_SP*u_c2/(-1.0_SP+log(30.0_SP*Hpo(I-1,J)/k_s)) &
+            + UpcTotal(I-1,J)
+# else			
+            ustar_c2= 0.4_SP*u_c2/(-1.0_SP+log(30.0_SP*Hpo(I-1,J)/k_s))	
+
+# endif		              
             k2=5.93_SP*(ustar_c2+ustar_c)*(Hpo(I-1,J)+Hpo(I,J))/4.0_SP
 # if defined (CARTESIAN)
          Scalx(I,J)=Scalx(I,J) &
@@ -1138,7 +1154,14 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
          IF(MASK(I,J-1).GT.0)THEN
             u_c4=SQRT(U(I,J-1)*U(I,J-1)+V(I,J-1)*V(I,J-1))
+
+# if defined (PROPELLER) && defined (VESSEL)
+            ustar_c4= 0.4_SP*u_c4/(-1.0_SP+log(30.0_SP*Hpo(I,J-1)/k_s)) &
+              + UpcTotal(I,J-1)
+# else
             ustar_c4= 0.4_SP*u_c4/(-1.0_SP+log(30.0_SP*Hpo(I,J-1)/k_s))
+
+# endif
             k4=5.93_SP*(ustar_c4+ustar_c)*(Hpo(I,J)+Hpo(I,J-1))/4.0_SP
 # if defined (CARTESIAN)
          Scaly(I,J)=Scaly(I,J) &
@@ -1211,7 +1234,12 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
     ! note rho_w is removed, also removed in tau_cr
 
+# if defined (PROPELLER) && defined (VESSEL)
+          Tau_xy(I,J)= 0.16_SP/(1.0+log(k_s/(30.0_SP*Hpo(I,J))))**2*(u_c**2.) &
+           + UpcTotal(I,J)**2.0_SP
+# else
           Tau_xy(I,J)= 0.16_SP/(1.0+log(k_s/(30.0_SP*Hpo(I,J))))**2*(u_c**2.)	
+# endif
 
        IF (CohesiveSediment)THEN
 
@@ -1263,7 +1291,13 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 !  bedload
 
           IF (Tau_xy(I,J).GT.Tau_cr_bedload) THEN
+
+# if defined (PROPELLER) && defined (VESSEL)
+             Angle_cur = ATAN2(V(I,J)+VpTotal(I,J),U(I,J)+UpTotal(I,J))
+# else
              Angle_cur = ATAN2(V(I,J),U(I,J))
+# endif
+
              bedf = 8.0_SP*(Tau_xy(I,J)-tau_cr_bedload)**1.5/grav/(Sdensity-1.0_SP)
              BedFluxX(I,J) = bedf*COS(Angle_cur)
              BedFluxY(I,J) = bedf*SIN(Angle_cur)

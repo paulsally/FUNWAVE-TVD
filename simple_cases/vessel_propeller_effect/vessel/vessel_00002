@@ -5,8 +5,8 @@ Length(m), Width(m), Alpha1(m),  Alpha2(m), Beta(m), P(unit)
 N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop(below deck), C_duct
 1.6, 3.7, 0.48, 1.1, 0.55, 2.5, 0.19
 Time, X(m), Y(m)  (relative to the orgin of the coordinates)
-0.0     900.0   60.0
-1000.0  -4100.0  60.0
+0.0     900.0  210.0
+100.0  -100.0  30.0
 
 
 

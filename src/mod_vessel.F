@@ -55,7 +55,7 @@
 MODULE VESSEL_MODULE
   USE PARAM
   USE GLOBAL,ONLY : Mloc,Nloc,Nghost,Ibeg,Iend,Jbeg,Jend,DX,DY, &
-                    H,ETA,ETA0,Xco,Yco
+                    H,ETA,ETA0,Xco,Yco,PERIODIC
 
   USE INPUT_READ
 #if defined (PARALLEL)
@@ -85,6 +85,8 @@ MODULE VESSEL_MODULE
 
     REAL(SP) :: Xves,Yves,Lves,Wves,P_x,P_y,DetaX,DetaY
 
+    INTEGER :: VTYPE
+
 !   deep draft vessel
 
 # if defined (DEEP_DRAFT_VESSEL)
@@ -100,7 +102,7 @@ MODULE VESSEL_MODULE
 
 # if defined (PROPELLER)
     REAL(SP),DIMENSION(:),ALLOCATABLE :: N_revolution,D_prop, C_thrust, D_hub, BAR, H_prop, C_duct
-    REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Up,Vp,UpTotal,VpTotal
+    REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Up,Vp,UpTotal,VpTotal,Upc,UpcTotal
     REAL(SP),DIMENSION(:),ALLOCATABLE :: Veff,Cf,IZEF
     REAL(SP) :: E0
 # endif
@@ -279,7 +281,8 @@ SUBROUTINE VESSEL_INITIAL
      ALLOCATE (N_revolution(NumVessel),D_prop(NumVessel), C_thrust(NumVessel), &
                D_hub(NumVessel), BAR(NumVessel), H_prop(NumVessel), C_duct(NumVessel), &
                Veff(NumVessel),Cf(NumVessel),IZEF(NumVessel))
-     ALLOCATE (Up(Mloc,Nloc),Vp(Mloc,Nloc),UpTotal(Mloc,Nloc),VpTotal(Mloc,Nloc))
+     ALLOCATE (Up(Mloc,Nloc),Vp(Mloc,Nloc),UpTotal(Mloc,Nloc),VpTotal(Mloc,Nloc), &
+               Upc(Mloc,Nloc),UpcTotal(Mloc,Nloc))
 # endif
       
       Gz = ZERO
@@ -464,6 +467,7 @@ SUBROUTINE VESSEL_FORCING
 # if defined (PROPELLER)
   UpTotal = ZERO
   VpTotal = ZERO
+  UpcTotal = ZERO
 # endif
 
   DO Kves = 1,NumVessel
@@ -533,6 +537,7 @@ SUBROUTINE VESSEL_FORCING
 # if defined (PROPELLER)
     UpTotal = UpTotal + Up
     VpTotal = VpTotal + Vp
+    UpcTotal = UpcTotal +Upc
 # endif
 
    ENDIF
@@ -617,6 +622,14 @@ SUBROUTINE VESSEL_FORCING
         ENDDO
     ENDIF
 !   ENDIF  ! end pressure source type 1 and 2
+
+# if defined (PARALLEL)
+# if defined (PROPELLER)
+    VTYPE=1
+    CALL PHI_COLL(Mloc,Nloc,Ibeg,Iend,Jbeg,Jend,Nghost,Upc,VTYPE,PERIODIC)    
+# endif
+# endif
+
 
 END SUBROUTINE VESSEL_FORCING
 
@@ -720,6 +733,7 @@ SUBROUTINE PRESSURE_SOURCE (Xves,Yves)
        ENDIF
        Up(I,J) = -UUp*COS(ThetaVessel(Kves))
        Vp(I,J) = -UUp*SIN(ThetaVessel(Kves))
+       Upc(I,J)=UUp*SQRT(Cf(Kves)/2.0_SP)
 # endif
      
     ENDDO
