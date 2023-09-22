@@ -1,5 +1,6 @@
 clear all
 fdir='output/';
+fdir1='output_nopropeller/';
 
 
 dep=load([fdir 'dep_00000']);
@@ -13,17 +14,10 @@ y=[0:n-1]*dy;
 
 
 
-nfile=[1:1:75];
+nfile=[35];
 
 
-myVideo = VideoWriter('videoOut.mp4','MPEG-4');
-myVideo.FrameRate = 10;  
-myVideo.Quality = 100;
-%vidHeight = 576; %this is the value in which it should reproduce
-%vidWidth = 1024; %this is the value in which it should reproduce
-open(myVideo);
-
-wid=8;
+wid=16;
 len=8;
 set(gcf,'units','inches','paperunits','inches','papersize', [wid len],'position',[1 1 wid len],'paperposition',[0 0 wid len]);
 clf
@@ -37,11 +31,16 @@ ch=load([fdir 'C_' fnum]);
 ds=load([fdir 'DchgS_' fnum]);
 db=load([fdir 'DchgB_' fnum]);
 
-subplot(411)
-pcolor(x,y,eta),shading flat
+eta1=load([fdir1 'eta_' fnum]);
+ch1=load([fdir1 'C_' fnum]);
+ds1=load([fdir1 'DchgS_' fnum]);
+db1=load([fdir1 'DchgB_' fnum]);
+
+subplot(421)
+pcolor(x,y,eta1),shading flat
 hold on
 caxis([-0.3 1.5])
-title([' Time = ' num2str(nfile(num)*1.0) ' sec '])
+title([' without propeller, Time = ' num2str(nfile(num)*1.0) ' sec '])
 
 cbar=colorbar;
 set(get(cbar,'ylabel'),'String',' \eta (m) ')
@@ -50,8 +49,8 @@ set(get(cbar,'ylabel'),'String',' \eta (m) ')
 %xlabel(' x (m) ')
 ylabel(' y (m) ')
 
-subplot(412)
-pcolor(x,y,ch*100),shading flat
+subplot(423)
+pcolor(x,y,ch1*100),shading flat
 hold on
 caxis([0.0 0.01])
 cbar=colorbar;
@@ -62,8 +61,8 @@ set(get(cbar,'ylabel'),'String',' c (%) ')
 ylabel(' y (m) ')
 
 
-subplot(413)
-pcolor(x,y,ds),shading flat
+subplot(425)
+pcolor(x,y,ds1),shading flat
 hold on
 caxis([-0.002 0.002])
 cbar=colorbar;
@@ -71,8 +70,8 @@ set(get(cbar,'ylabel'),'String',' S-load-induced (m) ')
 %xlabel(' x (m) ')
 ylabel(' y (m) ')
 
-subplot(414)
-pcolor(x,y,db),shading flat
+subplot(427)
+pcolor(x,y,db1),shading flat
 hold on
 caxis([-0.002 0.002])
 cbar=colorbar;
@@ -80,13 +79,48 @@ set(get(cbar,'ylabel'),'String',' B-load-induced (m) ')
 xlabel(' x (m) ')
 ylabel(' y (m) ')
 
+subplot(422)
+pcolor(x,y,eta),shading flat
+hold on
+caxis([-0.3 1.5])
+title([' with propeller, Time = ' num2str(nfile(num)*1.0) ' sec '])
 
-pause(0.1)
+cbar=colorbar;
+set(get(cbar,'ylabel'),'String',' \eta (m) ')
 
-F = print('-RGBImage','-r300');
-mov(num).cdata = F;
 
-writeVideo(myVideo,mov(num).cdata);
+%xlabel(' x (m) ')
+%ylabel(' y (m) ')
+
+subplot(424)
+pcolor(x,y,ch*100),shading flat
+hold on
+caxis([0.0 0.01])
+cbar=colorbar;
+set(get(cbar,'ylabel'),'String',' c (%) ')
+
+
+%xlabel(' x (m) ')
+%ylabel(' y (m) ')
+
+
+subplot(426)
+pcolor(x,y,ds),shading flat
+hold on
+caxis([-0.002 0.002])
+cbar=colorbar;
+set(get(cbar,'ylabel'),'String',' S-load-induced (m) ')
+%xlabel(' x (m) ')
+%ylabel(' y (m) ')
+
+subplot(428)
+pcolor(x,y,db),shading flat
+hold on
+caxis([-0.002 0.002])
+cbar=colorbar;
+set(get(cbar,'ylabel'),'String',' B-load-induced (m) ')
+xlabel(' x (m) ')
+%ylabel(' y (m) ')
 
 end
-close(myVideo)
+print -djpeg100 compare.jpg

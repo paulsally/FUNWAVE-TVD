@@ -75,7 +75,7 @@ MASK_FILE = ../result_irr/mask_0218
 HotStartTime = 2160.066
 OutputStartNumber = 219
   ! ----------------SHIP WAKES ----------------------------
-VESSEL_FOLDER = vessel/
+VESSEL_FOLDER = vessel_propeller/
 NumVessel = 2
   ! ----------------WAVEMAKER------------------------------
   !  wave maker

@@ -122,7 +122,7 @@ Beta_ref=        -0.53
   --------------input end --------------
                                           
                                         TIDAL_BC_ABS not defined, Default: False
- VESSEL_FOLDER:vessel/                                           
+ VESSEL_FOLDER:vessel_propeller/                                 
 NumVessel =   2
          PLOT_INTV_VESSEL not specified, use SMALL
  ----- Vessel Name : Title: Vessel # 1
@@ -405,5 +405,5 @@ CohesiveSediment not defined, Default: F
    PRINTING FILE NO.    77  TIME/TOTAL:       77.022 /      80.000
    PRINTING FILE NO.    78  TIME/TOTAL:       78.038 /      80.000
    PRINTING FILE NO.    79  TIME/TOTAL:       79.057 /      80.000
- Simulation takes   78.7346191     seconds
+ Simulation takes   73.3779297     seconds
  Normal Termination!

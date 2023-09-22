@@ -64,7 +64,7 @@ MODULE SEDIMENT_MODULE
   USE GLOBAL,ONLY : myid,ier, npx,npy,PX,PY
   USE MPI
 # endif
-# if defined (VESSEL)
+# if defined (VESSEL) && defined (PROPELLER)
   USE VESSEL_MODULE, ONLY : UpcTotal,UpTotal,VpTotal
 # endif
   IMPLICIT NONE
@@ -1119,7 +1119,7 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 ! diffusion (roller effect is not included in diffusion)
 
     DO J=Jbeg,Jend
-    DO I=Ibeg,Iend
+    DO I=Ibeg,Iend+1
 
        IF(MASK(I,J).GT.0)THEN
             u_c =SQRT(U(I,J)*U(I,J)+V(I,J)*V(I,J))
@@ -1142,6 +1142,8 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
 # endif		              
             k2=5.93_SP*(ustar_c2+ustar_c)*(Hpo(I-1,J)+Hpo(I,J))/4.0_SP
+
+
 # if defined (CARTESIAN)
          Scalx(I,J)=Scalx(I,J) &
               - k2*(Hpo(I-1,J)+Hpo(I,J))*(CH(I,J)-CH(I-1,J))/2.0_SP/DX
@@ -1151,7 +1153,15 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 # endif
 
          ENDIF ! mask x
+        ENDIF ! mask
 
+    ENDDO
+    ENDDO
+
+    DO J=Jbeg,Jend+1
+    DO I=Ibeg,Iend
+
+       IF(MASK(I,J).GT.0)THEN
          IF(MASK(I,J-1).GT.0)THEN
             u_c4=SQRT(U(I,J-1)*U(I,J-1)+V(I,J-1)*V(I,J-1))
 
@@ -1163,6 +1173,8 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 
 # endif
             k4=5.93_SP*(ustar_c4+ustar_c)*(Hpo(I,J)+Hpo(I,J-1))/4.0_SP
+
+
 # if defined (CARTESIAN)
          Scaly(I,J)=Scaly(I,J) &
               - k4*(Hpo(I,J-1)+Hpo(I,J))*(CH(I,J)-CH(I,J-1))/2.0_SP/DY
@@ -1260,7 +1272,11 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
 #if defined (SEDIMENT_DEBUG)
             Tau_extra(I,J)=0.0_SP
 # endif
-          IF (Tau_xy(I,J).GT.Tau_cr) THEN
+
+! Jim suggested changing the if statement to make it logical, it wont affect result
+!          IF (Tau_xy(I,J).GT.Tau_cr) THEN
+
+          IF (Tau_xy(I,J).GT.Tau_cr.AND.Hpo(I,J).GE.MinDepthPickup) THEN
 
 #if defined (SEDIMENT_DEBUG)
             Tau_extra(I,J)=Tau_xy(I,J)-Tau_cr
@@ -1273,7 +1289,9 @@ SUBROUTINE SEDIMENT_ADVECTION_DIFFUSION(ISTEP)
             ELSE
               reduction= 1.0_SP
             ENDIF
-            c_a=reduction*c_b*D50/(MAX(0.01_SP*Hpo(I,J),0.01_SP*MinDepthPickup))
+!   corresponding change for Jim suggestion
+!            c_a=reduction*c_b*D50/(MAX(0.01_SP*Hpo(I,J),0.01_SP*MinDepthPickup))
+            c_a=reduction*c_b*D50/(0.01_SP*Hpo(I,J))
             Pickup(I,J)=MAX(0.0_SP,c_a*WS)
 
 #if defined (SEDIMENT_DEBUG)
