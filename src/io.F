@@ -3785,6 +3785,9 @@ END SUBROUTINE READ_INPUT
 SUBROUTINE STATIONS
      USE GLOBAL
      USE INPUT_READ
+# if defined (FOAM)
+     USE MOD_FOAM
+# endif
      IMPLICIT NONE
 
      INTEGER :: iunit
@@ -3797,6 +3800,9 @@ SUBROUTINE STATIONS
      CHARACTER(LEN=80)::FDIR=' '
      LOGICAL :: FirstCallStation = .TRUE.
      SAVE FirstCallStation, BufferCount,ZUV_Buffer
+# if defined (FOAM)
+     REAL(SP) :: eddy_sta,EtaFoam_sta,EtaFoamMax_sta
+# endif
 
 ! initialize stations
      FDIR=TRIM(RESULT_FOLDER)
@@ -3805,8 +3811,15 @@ SUBROUTINE STATIONS
        ALLOCATE(ista(NumberStations),&
                 jsta(NumberStations),&
                 nsta(NumberStations))
+
+# if defined (FOAM)
+       ALLOCATE(BufferCount(NumberStations), &
+            ZUV_Buffer(StationOutputBuffer,NumberStations,7))
+# else
        ALLOCATE(BufferCount(NumberStations), &
             ZUV_Buffer(StationOutputBuffer,NumberStations,4))
+# endif
+
        BufferCount = 0
 ! calculate how many output components
 
@@ -3872,10 +3885,20 @@ SUBROUTINE STATIONS
              eta_sta=ZERO
              u_sta=ZERO
              v_sta=ZERO
+# if defined (FOAM)
+            eddy_sta = ZERO
+            EtaFoam_sta = ZERO
+            EtaFoamMax_sta = ZERO
+# endif
            ELSE  ! to avoid topography on nested water surface  
              eta_sta=eta(ista(i),jsta(i))
              u_sta=u(ista(i),jsta(i))
              v_sta=v(ista(i),jsta(i)) 
+# if defined (FOAM)
+            eddy_sta = nu_break(ista(i),jsta(i))
+            EtaFoam_sta = EtaFoam(ista(i),jsta(i))
+            EtaFoamMax_sta = EtaFoamMax(ista(i),jsta(i))
+# endif
            ENDIF
 
             IF(BufferCount(i)<StationOutputBuffer.AND.TIME<TOTAL_TIME)THEN
@@ -3884,16 +3907,29 @@ SUBROUTINE STATIONS
               ZUV_BUFFER(BufferCount(i),i,2)=eta_sta
               ZUV_BUFFER(BufferCount(i),i,3)=u_sta
               ZUV_BUFFER(BufferCount(i),i,4)=v_sta
+# if defined (FOAM)
+              ZUV_BUFFER(BufferCount(i),i,5)=eddy_sta
+              ZUV_BUFFER(BufferCount(i),i,6)=EtaFoam_sta
+              ZUV_BUFFER(BufferCount(i),i,7)=EtaFoamMax_sta
+# endif
             ELSE
               DO j=1,StationOutputBuffer
+# if defined (FOAM)
+                write (iunit,'(7E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
+# else
                 write (iunit,'(4E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
+# endif
               ENDDO              
               BufferCount(i) = 0
               ZUV_BUFFER(:,i,1)=TOTAL_TIME
+# if defined (FOAM)
+              ZUV_BUFFER(:,i,2:7)=ZERO
+# else
               ZUV_BUFFER(:,i,2:4)=ZERO
+# endif
 
 # if defined (PARALLEL)
-      if (myid.eq.0) WRITE(*,*) 'WRITE OUT STATAION ...'
+      if (myid.eq.0) WRITE(*,*) 'WRITE OUT STATION ...'
 # else
       WRITE(*,*) 'WRITE OUT STATIONS ...'
 # endif
@@ -3931,6 +3967,9 @@ END SUBROUTINE STATIONS
 
 SUBROUTINE STATIONS_SPHERICAL_IJ
      USE GLOBAL
+# if defined (FOAM)
+     USE MOD_FOAM
+# endif
      IMPLICIT NONE
 
      INTEGER :: iunit
@@ -3944,6 +3983,10 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
      LOGICAL :: FirstCallStation = .TRUE.
      SAVE FirstCallStation, BufferCount,ZUV_Buffer
 
+# if defined (FOAM)
+     REAL(SP) :: eddy_sta,EtaFoam_sta,EtaFoamMax_sta
+# endif
+
 ! initialize stations
      FDIR=TRIM(RESULT_FOLDER)
      if (FirstCallStation) then
@@ -3951,8 +3994,14 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
        ALLOCATE(ista(NumberStations),&
                 jsta(NumberStations),&
                 nsta(NumberStations))
+# if defined (FOAM)
+       ALLOCATE(BufferCount(NumberStations), &
+            ZUV_Buffer(StationOutputBuffer,NumberStations,7))
+# else
        ALLOCATE(BufferCount(NumberStations), &
             ZUV_Buffer(StationOutputBuffer,NumberStations,4))
+# endif
+
        BufferCount = 0
   
 ! calculate how many output components
@@ -4004,10 +4053,20 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
             eta_sta=ZERO
             u_sta=ZERO
             v_sta=ZERO
+# if defined (FOAM)
+            eddy_sta = ZERO
+            EtaFoam_sta = ZERO
+            EtaFoamMax_sta = ZERO
+# endif
           ELSE  ! to avoid topography on nested water surface
             eta_sta=eta(ista(i),jsta(i))
             u_sta=u(ista(i),jsta(i))
             v_sta=v(ista(i),jsta(i)) 
+# if defined (FOAM)
+            eddy_sta = nu(ista(i),jsta(i))
+            EtaFoam_sta = EtaFoam(ista(i),jsta(i))
+            EtaFoamMax_sta = EtaFoamMax(ista(i),jsta(i))
+# endif
           ENDIF
 
             IF(BufferCount(i)<StationOutputBuffer.AND.TIME<TOTAL_TIME)THEN
@@ -4016,16 +4075,29 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
               ZUV_BUFFER(BufferCount(i),i,2)=eta_sta
               ZUV_BUFFER(BufferCount(i),i,3)=u_sta
               ZUV_BUFFER(BufferCount(i),i,4)=v_sta
+# if defined (FOAM)
+              ZUV_BUFFER(BufferCount(i),i,5)=eddy_sta
+              ZUV_BUFFER(BufferCount(i),i,6)=EtaFoam_sta
+              ZUV_BUFFER(BufferCount(i),i,7)=EtaFoamMax_sta
+# endif
             ELSE
               DO j=1,StationOutputBuffer
+# if defined (FOAM)
+                write (iunit,'(7E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
+# else
                 write (iunit,'(4E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
+# endif
               ENDDO              
               BufferCount(i) = 0
               ZUV_BUFFER(:,i,1)=TOTAL_TIME
+# if defined (FOAM)
+              ZUV_BUFFER(:,i,2:7)=ZERO
+# else
               ZUV_BUFFER(:,i,2:4)=ZERO
+# endif
 
 # if defined (PARALLEL)
-      if (myid.eq.0) WRITE(*,*) 'WRITE OUT STATAION ...'
+      if (myid.eq.0) WRITE(*,*) 'WRITE OUT STATION ...'
 # else
       WRITE(*,*) 'WRITE OUT STATIONS ...'
 # endif
@@ -4033,9 +4105,6 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
 
             ENDIF ! end buffer
 
-
-!          write (iunit,'(20E16.5E4)') time, eta_sta,&
-!                          u_sta,v_sta
        endif
      enddo
 
@@ -4061,6 +4130,9 @@ END SUBROUTINE STATIONS_SPHERICAL_IJ
 !-------------------------------------------------------------------------------------
 SUBROUTINE STATIONS
      USE GLOBAL
+# if defined (FOAM)
+     USE MOD_FOAM
+# endif
      IMPLICIT NONE
 
      INTEGER :: iunit
@@ -4073,7 +4145,9 @@ SUBROUTINE STATIONS
      CHARACTER(LEN=80)::FDIR=' '
      LOGICAL :: FirstCallStationSP = .TRUE.
      SAVE FirstCallStationSP, BufferCount,ZUV_Buffer
-
+# if defined (FOAM)
+     REAL(SP) :: eddy_sta,EtaFoam_sta,EtaFoamMax_sta
+# endif
 
 ! initialize stations
      FDIR=TRIM(RESULT_FOLDER)
@@ -4082,8 +4156,14 @@ SUBROUTINE STATIONS
        ALLOCATE(ista(NumberStations),&
                 jsta(NumberStations),&
                 nsta(NumberStations))
+# if defined (FOAM)
+       ALLOCATE(BufferCount(NumberStations), &
+            ZUV_Buffer(StationOutputBuffer,NumberStations,7))
+# else
        ALLOCATE(BufferCount(NumberStations), &
             ZUV_Buffer(StationOutputBuffer,NumberStations,4))
+# endif
+
        BufferCount = 0
 
 !       ALLOCATE(envelope(Mloc,Nloc))
@@ -4140,10 +4220,20 @@ SUBROUTINE STATIONS
             eta_sta=ZERO
             u_sta=ZERO
             v_sta=ZERO
+# if defined (FOAM)
+            eddy_sta = ZERO
+            EtaFoam_sta = ZERO
+            EtaFoamMax_sta = ZERO
+# endif
           ELSE  ! to avoid topography on nested water surface
             eta_sta=eta(ista(i),jsta(i))
             u_sta=u(ista(i),jsta(i))
             v_sta=v(ista(i),jsta(i)) 
+# if defined (FOAM)
+            eddy_sta = nu(ista(i),jsta(i))
+            EtaFoam_sta = EtaFoam(ista(i),jsta(i))
+            EtaFoamMax_sta = EtaFoamMax(ista(i),jsta(i))
+# endif
           ENDIF
 
             IF(BufferCount(i)<StationOutputBuffer.AND.TIME<TOTAL_TIME)THEN
@@ -4152,29 +4242,35 @@ SUBROUTINE STATIONS
               ZUV_BUFFER(BufferCount(i),i,2)=eta_sta
               ZUV_BUFFER(BufferCount(i),i,3)=u_sta
               ZUV_BUFFER(BufferCount(i),i,4)=v_sta
+# if defined (FOAM)
+              ZUV_BUFFER(BufferCount(i),i,5)=eddy_sta
+              ZUV_BUFFER(BufferCount(i),i,6)=EtaFoam_sta
+              ZUV_BUFFER(BufferCount(i),i,7)=EtaFoamMax_sta
+# endif
             ELSE
               DO j=1,StationOutputBuffer
+# if defined (FOAM)
+                write (iunit,'(7E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
+# else
                 write (iunit,'(4E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
+# endif
               ENDDO              
               BufferCount(i) = 0
               ZUV_BUFFER(:,i,1)=TOTAL_TIME
+# if defined (FOAM)
+              ZUV_BUFFER(:,i,2:7)=ZERO
+# else
               ZUV_BUFFER(:,i,2:4)=ZERO
+# endif
 
 # if defined (PARALLEL)
-      if (myid.eq.0) WRITE(*,*) 'WRITE OUT STATAION ...'
+      if (myid.eq.0) WRITE(*,*) 'WRITE OUT STATION ...'
 # else
       WRITE(*,*) 'WRITE OUT STATIONS ...'
 # endif
 
 
             ENDIF ! end buffer
-
-
-!          write (iunit,'(20E16.5E4)') time, eta_sta,&
-!                          u_sta,v_sta
-
-!          write (iunit,*) time, eta(ista(i),jsta(i)),u(ista(i),jsta(i)),&
-!                                v(ista(i),jsta(i))
 
        endif
      enddo

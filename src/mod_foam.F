@@ -1,7 +1,8 @@
 # if defined (FOAM)
 Module MOD_FOAM
      USE GLOBAL, ONLY : SP,ZERO,Mloc,Mloc1,Nloc,Nloc1,DX,DY,DT,Nghost,pi,TIME, &
-                        PLOT_INTV, U,V,AGE_breaking,Ibeg,Iend,Jbeg,Jend
+                        PLOT_INTV, U,V,AGE_breaking,Ibeg,Iend,Jbeg,Jend,nu_break, &
+                        LARGE
                         
 # if defined (PARALLEL)
      USE GLOBAL, ONLY : n_west,n_east,n_suth,n_nrth,MPI_PROC_NULL
@@ -15,7 +16,7 @@ Module MOD_FOAM
      REAL(SP) :: TransferRate=0.1_SP
      REAL(SP) :: CdFoam=0.5
 
-     REAL(SP),DIMENSION(:,:),ALLOCATABLE :: EtaFoam,UFoam,VFoam
+     REAL(SP),DIMENSION(:,:),ALLOCATABLE :: EtaFoam,EtaFoamMax,UFoam,VFoam
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: Usurf1,Vsurf1,VFsurf1, &
                                             Usurf2,Vsurf2,VFsurf2, &
                                             Usurf,Vsurf,VFsurf,&
@@ -25,6 +26,8 @@ Module MOD_FOAM
      REAL(SP),DIMENSION(:,:),ALLOCATABLE ::MxFoam,MyFoam,&
                          FxFoam,FyFoam,GxFoam,GyFoam
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: SinkM,SourceM
+     REAL(SP) :: f_source = 0.05 ! default 
+     REAL(SP) :: FoamTimeScale = 3.8  ! default 
 
      LOGICAL :: OUT_FOAM = .FALSE.
 
@@ -37,7 +40,7 @@ SUBROUTINE ALLOCATE_FOAM
      IMPLICIT NONE
      
      ALLOCATE ( EtaFoam(Mloc,Nloc),UFoam(Mloc,Nloc),VFoam(Mloc,Nloc),&
-                MaskFoam(Mloc,Nloc) )
+                MaskFoam(Mloc,Nloc),EtaFoamMax(Mloc,Nloc))
      ALLOCATE ( MxFoam(Mloc1,Nloc),MyFoam(Mloc,Nloc1), &
                 FxFoam(Mloc1,Nloc),FyFoam(Mloc,Nloc1), &
                 GxFoam(Mloc1,Nloc),GyFoam(Mloc,Nloc1) )
@@ -86,6 +89,9 @@ SUBROUTINE INITIALIZATION_FOAM
 # endif
      ENDIF
 
+
+# if defined (USE_BURSTRATE)
+
 !!!!     REAL(SP),PARAMETER :: BurstRate=0.01_SP
 
       CALL READ_FLOAT(BurstRate,FILE_NAME,'BurstRate',ierr)
@@ -105,6 +111,49 @@ SUBROUTINE INITIALIZATION_FOAM
       if (myid.eq.0) WRITE(3,'(A20,F12.6)')'Foam BurstRate =', BurstRate
 # else
       WRITE(3,'(A20,F12.2)')'Foam BurstRate =', BurstRate
+# endif
+       ENDIF
+
+# endif 
+  ! end burst rate
+
+      CALL READ_FLOAT(f_source,FILE_NAME,'f_source',ierr)
+      IF(ierr==1)THEN
+        f_source = 0.05_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'Coefficient f_source not specified, use Default:  0.05'
+         WRITE(3,'(A80)')'Coefficient f_source not specified, use Default:  0.05'
+      endif
+# else
+         WRITE(*,'(A80)')'Coefficient f_source not specified, use Default:  0.05'
+         WRITE(3,'(A80)')'Coefficient f_source not specified, use Default:  0.05'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'f_source =', f_source
+# else
+      WRITE(3,'(A20,F12.2)')'f_source =', f_source
+# endif
+       ENDIF
+
+      CALL READ_FLOAT(FoamTimeScale,FILE_NAME,'FoamTimeScale',ierr)
+      IF(ierr==1)THEN
+        FoamTimeScale = 3.8_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'FoamTimeScale not specified, use Default:  3.8'
+         WRITE(3,'(A80)')'FoamTimeScale not specified, use Default:  3.8'
+      endif
+# else
+         WRITE(*,'(A80)')'FoamTimeScale not specified, use Default:  3.8'
+         WRITE(3,'(A80)')'FoamTimeScale not specified, use Default:  3.8'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'FoamTimeScale =', FoamTimeScale
+# else
+      WRITE(3,'(A20,F12.2)')'FoamTimeScale =', FoamTimeScale
 # endif
        ENDIF
 
@@ -130,9 +179,7 @@ SUBROUTINE INITIALIZATION_FOAM
 # endif
        ENDIF
 
-
-!!!!     REAL(SP),PARAMETER :: TransferRate=0.1_SP
-
+# if defined (USE_BURSTRATE)
       CALL READ_FLOAT(TransferRate,FILE_NAME,'TransferRate',ierr)
       IF(ierr==1)THEN
         TransferRate = 0.1_SP
@@ -153,8 +200,8 @@ SUBROUTINE INITIALIZATION_FOAM
 # endif
        ENDIF
 
-
-!!!!     REAL(SP),PARAMETER :: CdFoam=0.5
+# endif
+  ! end burst rate
 
       CALL READ_FLOAT(CdFoam,FILE_NAME,'CdFoam',ierr)
       IF(ierr==1)THEN
@@ -179,6 +226,7 @@ SUBROUTINE INITIALIZATION_FOAM
 
 ! all other variables used for foam
      EtaFoam=ZERO
+     EtaFoamMax=ZERO
      UFoam=ZERO
      VFoam=ZERO
      MaskFoam=1
@@ -212,6 +260,9 @@ SUBROUTINE FOAM_UPDATE
      Vsurf=V
      VFsurf=AGE_breaking
 
+
+# if defined (USE_BURSTRATE)
+      ! this is the old approach 
         DO J=1,Nloc
          DO I=1,Mloc
           IF(VFsurf(I,J)<0.1)VFsurf(I,J)=1000.0_SP
@@ -220,6 +271,22 @@ SUBROUTINE FOAM_UPDATE
           SourceM(I,J)=VFsurf(I,J)*TransferRate*MaskFoam(I,J)
          ENDDO
         ENDDO
+# else
+     ! new approach using Reul and Chapron 2003
+        DO J=1,Nloc
+         DO I=1,Mloc
+          ! set breaking init time
+          IF(VFsurf(I,J)<2.0*DT) THEN
+            VFsurf(I,J)=LARGE
+            EtaFoamMax(I,J)=0.0
+          ENDIF
+          IF (EtaFoam(I,J) > EtaFoamMax(I,J)) EtaFoamMax(I,J)=EtaFoam(I,J)
+          SinkM(I,J)=EtaFoamMax(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
+          SourceM(I,J)=f_source*nu_break(I,J)*MaskFoam(I,J)
+         ENDDO
+        ENDDO
+
+# endif
 
 ! EtaFoam
 
