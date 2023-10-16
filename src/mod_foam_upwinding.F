@@ -280,13 +280,9 @@ SUBROUTINE FOAM_UPDATE
             VFsurf(I,J)=LARGE
             EtaFoamMax(I,J)=0.0
           ENDIF
-          ! set age for nonbreaking zone
-          IF (nu_break(I,J) == ZERO) THEN
-            VFsurf(I,J)=2.0*DT
-          ENDIF
           IF (EtaFoam(I,J) > EtaFoamMax(I,J)) EtaFoamMax(I,J)=EtaFoam(I,J)
-!          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
-          SinkM(I,J)=EtaFoam(I,J)*VFsurf(I,J)/FoamTimeScale**2*EXP(-VFsurf(I,J)/FoamTimeScale)
+!          SinkM(I,J)=EtaFoamMax(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
+          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
           SourceM(I,J)=f_source*nu_break(I,J)*MaskFoam(I,J)
          ENDDO
         ENDDO
@@ -301,17 +297,10 @@ SUBROUTINE FOAM_UPDATE
       DO J=Jbeg,Jend
       DO I=Ibeg,Iend
 
-# if defined(CARTESIAN)
-       EtaFoam(I,J)=EtaFoam(I,J)-DT*(MxFoam(I+1,J)-MxFoam(I,J))/DX &
-                                -DT*(MyFoam(I,J+1)-MyFoam(I,J))/DY &
+       EtaFoam(I,J)=EtaFoam(I,J)-DT*MxFoam(I,J) &
+                                -DT*MyFoam(I,J) &
                                 -SinkM(I,J)*DT &
                                 +SourceM(I,J)*DT 
-# else
-       EtaFoam(I,J)=EtaFoam(I,J)-DT*(MxFoam(I+1,J)-MxFoam(I,J))/DX(I,J) &
-                                -DT*(MyFoam(I,J+1)-MyFoam(I,J))/DY(I,J) &
-                                -SinkM(I,J)*DT &
-                                +SourceM(I,J)*DT
-# endif
 
        IF(EtaFoam(I,J)<ZERO)EtaFoam(I,J)=ZERO
 
@@ -319,30 +308,32 @@ SUBROUTINE FOAM_UPDATE
      ENDDO
 
 
-! UFoam,VFoam
-!     DO J=1+Nghost,Nloc-2*Nghost
-!     DO I=1+Nghost,Mloc-2*Nghost
+!! UFoam,VFoam
+!!     DO J=1+Nghost,Nloc-2*Nghost
+!!     DO I=1+Nghost,Mloc-2*Nghost
 
-      DO J=Jbeg,Jend
-      DO I=Ibeg,Iend
+!  this is the previous foam approach Shi et al ICCE 2012
 
-       IF(EtaFoam(I,J)>ZERO)THEN
-         Uabs=SQRT((Usurf(I,J)-UFoam(I,J))**2+(Vsurf(I,J)-VFoam(I,J))**2)
-         Uadd=Uabs*(Usurf(I,J)-UFoam(I,J))*CdFoam/MAX(EtaFoam(I,J),MinThick)*DT
-         Vadd=Uabs*(Vsurf(I,J)-VFoam(I,J))*CdFoam/MAX(EtaFoam(I,J),MinThick)*DT
+!      DO J=Jbeg,Jend
+!      DO I=Ibeg,Iend
 
-         IF(ABS(Uadd)>ABS(Usurf(I,J)-UFoam(I,J)))Uadd=Usurf(I,J)
-         IF(ABS(Vadd)>ABS(Vsurf(I,J)-VFoam(I,J)))Vadd=Vsurf(I,J)
+!       IF(EtaFoam(I,J)>ZERO)THEN
+!         Uabs=SQRT((Usurf(I,J)-UFoam(I,J))**2+(Vsurf(I,J)-VFoam(I,J))**2)
+!         Uadd=Uabs*(Usurf(I,J)-UFoam(I,J))*CdFoam/MAX(EtaFoam(I,J),MinThick)*DT
+!         Vadd=Uabs*(Vsurf(I,J)-VFoam(I,J))*CdFoam/MAX(EtaFoam(I,J),MinThick)*DT
 
-         UFoam(I,J) = UFoam(I,J) + Uadd
-         VFoam(I,J) = VFoam(I,J) + Vadd
+!         IF(ABS(Uadd)>ABS(Usurf(I,J)-UFoam(I,J)))Uadd=Usurf(I,J)
+!         IF(ABS(Vadd)>ABS(Vsurf(I,J)-VFoam(I,J)))Vadd=Vsurf(I,J)
 
-        ELSE
-          UFoam(I,J)=ZERO
-          VFoam(I,J)=ZERO
-        ENDIF
-     ENDDO
-     ENDDO
+!         UFoam(I,J) = UFoam(I,J) + Uadd
+!         VFoam(I,J) = VFoam(I,J) + Vadd
+
+!        ELSE
+!          UFoam(I,J)=ZERO
+!          VFoam(I,J)=ZERO
+!        ENDIF
+!     ENDDO
+!     ENDDO
 
 END SUBROUTINE FOAM_UPDATE
 
@@ -405,14 +396,15 @@ SUBROUTINE FOAM_BC
 
 # if defined (PARALLEL)
      call phi_exch(EtaFoam)
-     call phi_exch(UFoam)
-     call phi_exch(VFoam)
+! remove the approach of Shi et al. ICCE
+!     call phi_exch(UFoam)
+!     call phi_exch(VFoam)
 # endif
 
 
 END SUBROUTINE FOAM_BC
 
-SUBROUTINE FOAM_FLUX
+SUBROUTINE FOAM_FLUX_ICCE
      IMPLICIT NONE
      REAL(SP),DIMENSION(Mloc1,Nloc) :: VxL,VxR
      REAL(SP),DIMENSION(Mloc,Nloc1) :: VyL,VyR
@@ -468,6 +460,53 @@ SUBROUTINE FOAM_FLUX
      ENDDO
 
 
+
+END SUBROUTINE FOAM_FLUX_ICCE
+
+SUBROUTINE FOAM_FLUX
+     IMPLICIT NONE
+     REAL(SP),DIMENSION(Mloc1,Nloc) :: VxL,VxR
+     REAL(SP),DIMENSION(Mloc,Nloc1) :: VyL,VyR
+     REAL(SP),DIMENSION(Mloc,Nloc) :: DelX,DelY
+     INTEGER :: I,J,K
+
+! upwinding
+
+    DO J=Jbeg,Jend
+    DO I=Ibeg,Iend
+     IF(u(I,J)>ZERO)THEN
+# if defined (CARTESIAN)
+       MxFoam(I,J)=(u(I,J)*EtaFoam(I,J)-u(I-1,J)*EtaFoam(I-1,J))/DX
+# else
+       MxFoam(I,J)=(u(I,J)*EtaFoam(I,J)-u(I-1,J)*EtaFoam(I-1,J))/DX(I,J)
+# endif
+     ELSE
+# if defined (CARTESIAN)
+       MxFoam(I,J)=(u(I+1,J)*EtaFoam(I+1,J)-u(I,J)*EtaFoam(I,J))/DX
+# else
+       MxFoam(I,J)=(u(I+1,J)*EtaFoam(I+1,J)-u(I,J)*EtaFoam(I,J))/DX(I,J)
+# endif
+     ENDIF
+    ENDDO
+    ENDDO
+
+    DO J=Jbeg,Jend
+    DO I=Ibeg,Iend
+     IF(v(I,J)>ZERO)THEN
+# if defined (CARTESIAN)
+       MyFoam(I,J)=(v(I,J)*EtaFoam(I,J)-v(I,J-1)*EtaFoam(I,J-1))/DY
+# else
+       MyFoam(I,J)=(v(I,J)*EtaFoam(I,J)-v(I,J-1)*EtaFoam(I,J-1))/DY(I,J)
+# endif
+     ELSE
+# if defined (CARTESIAN)
+       MyFoam(I,J)=(v(I,J+1)*EtaFoam(I,J+1)-v(I,J)*EtaFoam(I,J))/DY
+# else
+       MyFoam(I,J)=(v(I,J+1)*EtaFoam(I,J+1)-v(I,J)*EtaFoam(I,J))/DY(I,J)
+# endif
+     ENDIF
+    ENDDO
+    ENDDO
 
 END SUBROUTINE FOAM_FLUX
 
