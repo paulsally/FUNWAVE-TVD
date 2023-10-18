@@ -28,6 +28,7 @@ Module MOD_FOAM
      REAL(SP),DIMENSION(:,:),ALLOCATABLE :: SinkM,SourceM
      REAL(SP) :: f_source = 0.05 ! default 
      REAL(SP) :: FoamTimeScale = 3.8  ! default 
+     REAL(SP) :: BurstTimeNonBreaking = 1.0 ! default
 
      LOGICAL :: OUT_FOAM = .FALSE.
 
@@ -157,6 +158,26 @@ SUBROUTINE INITIALIZATION_FOAM
 # endif
        ENDIF
 
+      CALL READ_FLOAT(BurstTimeNonBreaking,FILE_NAME,'BurstTimeNonBreaking',ierr)
+      IF(ierr==1)THEN
+        BurstTimeNonBreaking = 1.0_SP
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A80)')'BurstTimeNonBreaking not specified, use Default:  1.0'
+         WRITE(3,'(A80)')'BurstTimeNonBreaking not specified, use Default:  1.0'
+      endif
+# else
+         WRITE(*,'(A80)')'BurstTimeNonBreaking not specified, use Default:  1.0'
+         WRITE(3,'(A80)')'BurstTimeNonBreaking not specified, use Default:  1.0'
+# endif
+     ELSE
+# if defined (PARALLEL)
+      if (myid.eq.0) WRITE(3,'(A20,F12.6)')'BurstTimeNonBreaking =', BurstTimeNonBreaking
+# else
+      WRITE(3,'(A20,F12.2)')'BurstTimeNonBreaking =', BurstTimeNonBreaking
+# endif
+       ENDIF
+
 !!!!     REAL(SP),PARAMETER :: MinThick=0.01_SP
 
       CALL READ_FLOAT(MinThick,FILE_NAME,'MinThick',ierr)
@@ -282,11 +303,12 @@ SUBROUTINE FOAM_UPDATE
           ENDIF
           ! set age for nonbreaking zone
           IF (nu_break(I,J) == ZERO) THEN
-            VFsurf(I,J)=2.0*DT
+            VFsurf(I,J)=BurstTimeNonBreaking
           ENDIF
           IF (EtaFoam(I,J) > EtaFoamMax(I,J)) EtaFoamMax(I,J)=EtaFoam(I,J)
 !          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
-          SinkM(I,J)=EtaFoam(I,J)*VFsurf(I,J)/FoamTimeScale**2*EXP(-VFsurf(I,J)/FoamTimeScale)
+!          SinkM(I,J)=EtaFoam(I,J)*VFsurf(I,J)/FoamTimeScale**2*EXP(-VFsurf(I,J)/FoamTimeScale)
+          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale**2*EXP(-VFsurf(I,J)/FoamTimeScale)
           SourceM(I,J)=f_source*nu_break(I,J)*MaskFoam(I,J)
          ENDDO
         ENDDO
