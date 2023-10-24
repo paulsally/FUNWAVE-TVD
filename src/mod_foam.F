@@ -306,9 +306,7 @@ SUBROUTINE FOAM_UPDATE
             VFsurf(I,J)=BurstTimeNonBreaking
           ENDIF
           IF (EtaFoam(I,J) > EtaFoamMax(I,J)) EtaFoamMax(I,J)=EtaFoam(I,J)
-!          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
-!          SinkM(I,J)=EtaFoam(I,J)*VFsurf(I,J)/FoamTimeScale**2*EXP(-VFsurf(I,J)/FoamTimeScale)
-          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale**2*EXP(-VFsurf(I,J)/FoamTimeScale)
+          SinkM(I,J)=EtaFoam(I,J)/FoamTimeScale*EXP(-VFsurf(I,J)/FoamTimeScale)
           SourceM(I,J)=f_source*nu_break(I,J)*MaskFoam(I,J)
          ENDDO
         ENDDO
