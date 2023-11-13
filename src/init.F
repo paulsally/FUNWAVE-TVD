@@ -990,7 +990,7 @@ SUBROUTINE INITIALIZATION
      DO I=1,Mloc
       IF(Eta(I,J)<-DEPTH(I,J))THEN
        MASK(I,J)=0
-       Eta(I,J)=MinDepth-Depth(I,J)
+       Eta(I,J)=-MinDepth-Depth(I,J)
 # if defined(UseEtaScreen)
        EtaScreen(I,J)=Eta(I,J)
 # endif

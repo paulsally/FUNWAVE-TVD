@@ -103,7 +103,7 @@ SUBROUTINE UPDATE_MASK
            MASKtmp(I,J)=1
          ENDIF
 # else
-           ! this is for rainfall case
+           ! this is for rainfall case $$$
          IF(Eta(I,J)>-Depth(I,J))THEN
           MASKtmp(I,J)=1
          ENDIF

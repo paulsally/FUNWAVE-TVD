@@ -2778,12 +2778,12 @@ SUBROUTINE READ_INPUT
         Cd_fixed = 0.0_SP
 # if defined (PARALLEL)
       if (myid.eq.0) THEN
-         WRITE(*,'(A40)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
-         WRITE(3,'(A40)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
+         WRITE(*,'(A80)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
+         WRITE(3,'(A80)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
       endif
 # else
-         WRITE(*,'(A40)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
-         WRITE(3,'(A40)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
+         WRITE(*,'(A80)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
+         WRITE(3,'(A80)')'Cd_fixed Default:  0.0, possibly you used FRICTION_MATRIX'
 # endif
        ENDIF
      
@@ -2943,8 +2943,8 @@ SUBROUTINE READ_INPUT
 # endif
        ENDIF
 
-!  merge two parameters into the minimum one
-       MinDepthFrc=MAX(MinDepthFrc,MinDepth)
+!  merge two parameters into the minimum one, change to min according to Harris 11/13/2023
+       MinDepthFrc=MIN(MinDepthFrc,MinDepth)
        MinDepth=MinDepthFrc
 
 # if defined (PARALLEL)
