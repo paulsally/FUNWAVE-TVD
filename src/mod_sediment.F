@@ -941,8 +941,8 @@ SUBROUTINE SEDIMENT_INITIAL
       
       IF(WS_formula) THEN
         WS = SQRT((Sdensity-1.0_SP)*grav*D50)* &
-             SQRT(2.0_SP/3.0_SP + 36.0_SP*viscosity**2/((Sdensity-1.0_SP)*grav*D50**3)) - &
-             SQRT(36.0_SP*viscosity**2/((Sdensity-1.0_SP)*grav*D50**3))
+             (SQRT(2.0_SP/3.0_SP + 36.0_SP*viscosity**2/((Sdensity-1.0_SP)*grav*D50**3)) - &
+             SQRT(36.0_SP*viscosity**2/((Sdensity-1.0_SP)*grav*D50**3)))
 # if defined (PARALLEL)
        IF(MYID==0)THEN
 # endif
