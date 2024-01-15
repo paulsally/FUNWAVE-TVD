@@ -196,12 +196,15 @@ SUBROUTINE ALLOCATE_VARIABLES
         ALLOCATE(WAVE_COMP(NumWaveComp,3),Beta_genS(NumWaveComp),D_genS(NumWaveComp) )
       ENDIF
 
-      IF(VISCOSITY_BREAKING.OR.SHOW_BREAKING)THEN
+! define breaking related variables for all options,remove viscosity breaking only
+! fyshi 01/15/2024
+
+!      IF(VISCOSITY_BREAKING.OR.SHOW_BREAKING)THEN
        ALLOCATE(AGE_BREAKING(Mloc,Nloc))
        ALLOCATE(nu_break(Mloc,Nloc))
        nu_break=nu_bkg
        ALLOCATE(BreakSourceX(Mloc,Nloc),BreakSourceY(Mloc,Nloc))
-      ENDIF
+!      ENDIF
 
       ALLOCATE(FrcInsX(Mloc,Nloc),FrcInsY(Mloc,Nloc))
 	
