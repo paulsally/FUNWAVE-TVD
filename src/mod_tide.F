@@ -81,7 +81,7 @@ MODULE TIDE_MODULE
   REAL(SP) :: TideSouth_U,TideSouth_V,TideSouth_ETA
   REAL(SP),DIMENSION(:,:),ALLOCATABLE :: SPONGE_TIDE_WEST, &
               SPONGE_TIDE_EAST,SPONGE_TIDE_SOUTH,SPONGE_TIDE_NORTH
-  INTEGER :: Iwidth,Ifile
+  INTEGER :: Iwidth,Ifile,Iwidth_tide
   REAL(SP) :: Time_tide_west_1,Eta_tide_west_1,U_tide_west_1,V_tide_west_1, &
               Time_tide_west_2,Eta_tide_west_2,U_tide_west_2,V_tide_west_2, &
               Time_tide_east_1,Eta_tide_east_1,U_tide_east_1,V_tide_east_1, &
@@ -110,6 +110,23 @@ SUBROUTINE TIDE_INITIAL
 
 ! read  from input.txt
       FILE_NAME=INPUT_FILE_NAME
+
+! width of sponge
+
+      CALL READ_INTEGER(Iwidth_tide,FILE_NAME,'WaveMakerPointNum',ierr)
+
+      IF(ierr==1)THEN
+        Iwidth_tide = 30
+# if defined (PARALLEL)
+      if (myid.eq.0) THEN
+         WRITE(*,'(A40)')'WaveMakerPointNum Default:  30 points'
+         WRITE(3,'(A40)')'WaveMakerPointNum Default:  30 points'
+      endif
+# else
+         WRITE(*,'(A40)')'WaveMakerPointNum Default:  30 points'
+         WRITE(3,'(A40)')'WaveMakerPointNum Default:  30 points'
+# endif
+       ENDIF     
 
  ! absorb only
 
@@ -231,7 +248,7 @@ SUBROUTINE TIDE_SPONGE
   IMPLICIT NONE
   REAL(SP) :: ri,lim,Lstart,Lend,R_sp,A_sp
   
-  Iwidth = 30
+  Iwidth = Iwidth_tide ! specified in read or default = 30
   lim = 1.0_SP
   R_sp = 0.85_SP
   A_sp = 10.0_SP

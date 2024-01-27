@@ -196,6 +196,12 @@ SUBROUTINE ALLOCATE_VARIABLES
         ALLOCATE(WAVE_COMP(NumWaveComp,3),Beta_genS(NumWaveComp),D_genS(NumWaveComp) )
       ENDIF
 
+! moved the wavemaker stuff from wavemaker.F 
+!       ALLOCATE(Cm_eta(Mloc,Nloc,Numfreq),Sm_eta(Mloc,Nloc,Numfreq), &
+!                Cm_u(Mloc,Nloc,Numfreq),Sm_u(Mloc,Nloc,Numfreq),&
+!                Cm_v(Mloc,Nloc,Numfreq),Sm_v(Mloc,Nloc,Numfreq) )
+
+
 ! define breaking related variables for all options,remove viscosity breaking only
 ! fyshi 01/15/2024
 

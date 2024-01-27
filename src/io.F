@@ -149,6 +149,7 @@ END SUBROUTINE OUTPUT
 SUBROUTINE READ_INPUT
     USE GLOBAL
     USE INPUT_READ
+!    USE TIME_SPECTRA_MODULE
 ![jychoi added this for intel compiler 14.12.23    
 # if defined(INTEL)
      USE IFPORT

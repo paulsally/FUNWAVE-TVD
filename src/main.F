@@ -134,6 +134,7 @@ Program FUNWAVE_TVD
 !
 !-------------------------------------------------------------------------------------
      USE GLOBAL
+     
 # if defined (VESSEL)
      USE VESSEL_MODULE
 # endif
@@ -156,6 +157,7 @@ Program FUNWAVE_TVD
 # endif
 
      USE TIDE_MODULE
+     USE TIME_SPECTRA_MODULE
 
      IMPLICIT NONE
 
@@ -211,7 +213,16 @@ Program FUNWAVE_TVD
 
      CALL INITIALIZATION
 
+! time dependent wave spectra
+
+     IF(WaveMaker(1:12)=='TIME_SPECTRA') THEN
+       CALL TIME_SPECTRA_INITIAL
+     ENDIF
+
      CALL TIDE_INITIAL
+
+!    time spectra only use tide abs_gen and tide data type
+     CALL TIME_SPECTRA_PROTECTION
       
 # if defined (DEBUG)
 #    if defined (PARALLEL)
@@ -338,6 +349,27 @@ Program FUNWAVE_TVD
          CALL TIDE_DATA
        ENDIF
 
+# if defined (DEBUG)
+#    if defined (PARALLEL)
+       IF(myid==0) WRITE(*,*) 'PASS CALL TIDE_DATA'     
+#    else   
+       WRITE(*,*) 'PASS CALL TIDE_DATA'
+#    endif
+# endif
+
+       IF(WaveMaker(1:12) == 'TIME_SPECTRA') THEN
+         CALL TIME_SPECTRA_INTERPOLATION
+       ENDIF
+
+# if defined (DEBUG)
+#    if defined (PARALLEL)
+       IF(myid==0) WRITE(*,*) 'PASS CALL TIME_SPECTRA_INTERPOLATION'     
+#    else   
+       WRITE(*,*) 'PASS CALL TIME_SPECTRA_INTERPOLATION'
+#    endif
+# endif
+
+
 #if defined (PRECIPITATION)
      CALL PRECIPITATION_DISTRIBUTION
 # endif
@@ -429,14 +461,14 @@ Program FUNWAVE_TVD
 # endif
          
 
-       IF(WaveMaker(1:3)=='ABS') THEN
+       IF(WaveMaker(1:3)=='ABS' .OR. WaveMaker(1:12)=='TIME_SPECTRA') THEN
          CALL ABSORBING_GENERATING_BC
 
 # if defined (DEBUG)
 #    if defined (PARALLEL)
-       IF(myid==0) WRITE(*,*) 'ABS wavemaker'     
+       IF(myid==0) WRITE(*,*) 'ABS or TIME_SPECTRA wavemaker'     
 #    else   
-       WRITE(*,*) 'ABS wavemaker'
+       WRITE(*,*) 'ABS or TIME_SPECTRA wavemakerwavemaker'
 #    endif
 # endif
 
