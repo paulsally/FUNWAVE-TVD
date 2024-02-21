@@ -87,7 +87,6 @@ MODULE TIME_SPECTRA_MODULE
 # endif
   IMPLICIT NONE
   SAVE
-
        REAL(SP), DIMENSION(:,:),ALLOCATABLE :: AmpData1,AmpData2
 
     REAL(SP) :: TimeSpectra1,TimeSpectra2
@@ -109,6 +108,9 @@ CONTAINS
 SUBROUTINE TIME_SPECTRA_INITIAL
   USE GLOBAL,ONLY : itmp1,itmp2,itmp3,itmp4,SMALL,LARGE,INPUT_FILE_NAME
                     
+# if  defined(INTEL)
+  USE IFPORT
+# endif
   USE INPUT_READ
   IMPLICIT NONE
 
