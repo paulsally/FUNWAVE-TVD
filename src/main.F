@@ -221,8 +221,10 @@ Program FUNWAVE_TVD
 
      CALL TIDE_INITIAL
 
+     IF(WaveMaker(1:12)=='TIME_SPECTRA') THEN
 !    time spectra only use tide abs_gen and tide data type
      CALL TIME_SPECTRA_PROTECTION
+     ENDIF
       
 # if defined (DEBUG)
 #    if defined (PARALLEL)
