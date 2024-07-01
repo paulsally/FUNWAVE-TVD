@@ -3916,9 +3916,9 @@ SUBROUTINE STATIONS
             ELSE
               DO j=1,StationOutputBuffer
 # if defined (FOAM)
-                write (iunit,'(7E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
+                write (iunit,'(E21.10E4, 6E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
 # else
-                write (iunit,'(4E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
+                write (iunit,'(E21.10E4, 3E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
 # endif
               ENDDO              
               BufferCount(i) = 0
@@ -4084,9 +4084,9 @@ SUBROUTINE STATIONS_SPHERICAL_IJ
             ELSE
               DO j=1,StationOutputBuffer
 # if defined (FOAM)
-                write (iunit,'(7E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
+                write (iunit,'(E21.10E4, 6E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
 # else
-                write (iunit,'(4E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
+                write (iunit,'(E21.10E4, 3E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
 # endif
               ENDDO              
               BufferCount(i) = 0
@@ -4251,9 +4251,9 @@ SUBROUTINE STATIONS
             ELSE
               DO j=1,StationOutputBuffer
 # if defined (FOAM)
-                write (iunit,'(7E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
+                write (iunit,'(E21.10E4, 6E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,7)
 # else
-                write (iunit,'(4E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
+                write (iunit,'(E21.10E4, 3E16.5E4)') (ZUV_BUFFER(j,i,k),k=1,4)
 # endif
               ENDDO              
               BufferCount(i) = 0
