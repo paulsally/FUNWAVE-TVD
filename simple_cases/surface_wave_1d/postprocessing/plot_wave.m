@@ -1,5 +1,5 @@
 clear all
-fdir='/Users/fengyanshi15/tmp1/';
+fdir='/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/output_files_reg/';
 
 m=1024;
 dx=1.0;
@@ -22,7 +22,7 @@ len=4;
 set(gcf,'units','inches','paperunits','inches','papersize', [wid len],'position',[1 1 wid len],'paperposition',[0 0 wid len]);
 clf
 
-eta=load([fdir 'eta_00014']);
+eta=load([fdir 'eta_00003'], "-ascii");
 plot(x,-dep,'k',x,eta,'b','LineWidth',2)
 hold on
 plot(x_wm,yy,'r')

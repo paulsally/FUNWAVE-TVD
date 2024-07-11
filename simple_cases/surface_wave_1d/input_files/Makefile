@@ -3,7 +3,7 @@ FUNWAVE_DIR = ../../..
 WORK_DIR    = .
 COMPILER    = gnu
 PARALLEL    = true
-EXEC        = funwave
+EXEC        = funwave_surface_wave_1d
 PRECISION   = single
 
 #-----------DEFINE FLAGS-----------------------------
@@ -18,6 +18,15 @@ PRECISION   = single
 # FLAG_8  = -DCHECK_MASS_CONSERVATION
 # FLAG_9  = -DTMP
 # FLAG_10 = -DTRACKING
+
+FLAG_1 = -DDOUBLE_PRECISION
+FLAG_4 = -DCARTESIAN
+
+#  if parallel add
+# FLAG_2 = -DPARALLEL
+
+#  if intel compiler add
+# FLAG_6 = -DINTEL
 
 #----------------uncommon options---------------------
 DEF_FC      = 

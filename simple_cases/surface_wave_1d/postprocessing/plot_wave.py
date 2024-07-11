@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os 
 # write your OWN PC folder path for fdir
 # Remember that we use for Mac & Linux machines '/', while on windows '\', adding r before the string helps with windows machines
-fdir = r'/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/surface_wave_1d/surface_wave_1D/' 
+fdir = r'/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/output_files_reg/' 
 
 m = 1024
 dx = 1.0
@@ -40,26 +40,31 @@ length = 4  #length
 # plot figure
 fig = plt.figure(figsize=(wid,length),dpi=600)
 
-eta = np.loadtxt(os.path.join(fdir,'eta_00014'))
+# Specify the specific string to match
+prefix = "eta_"
 
-ax = fig.add_subplot(1,1,1)
-fig.subplots_adjust(hspace=1,wspace=.5)
-plt.plot(x,DEP[:,0],'k',x,eta[0,:],'b',linewidth=2)
-plt.plot(x_wm,yy,'r')
-plt.plot(x_sponge,yy,'k')
+for filename in sorted(os.listdir(fdir), key=str.casefold):
+    if filename.startswith(prefix):
+        eta = np.loadtxt(os.path.join(fdir, filename))
 
-plt.hold(True)
-plt.grid()
+        ax = fig.add_subplot(1,1,1)
 
-plt.text(x_wm[1],0.6,'Wavemaker',color='red', fontsize=12,style='oblique')
-plt.text(x_sponge[0]+20,0.6,'Sponge Layer',color='black',
-         fontsize=12,style='oblique')
+        fig.subplots_adjust(hspace=1,wspace=.5)
+        plt.plot(x,DEP[:,0],'k',x,eta[0,:],'b',linewidth=2)
+        plt.plot(x_wm,yy,'r')
+        plt.plot(x_sponge,yy,'k')
 
-ax.axis([0, 1024, -1, 1])
-plt.minorticks_on()
-plt.xlabel('X (m)')
-plt.ylabel(r'$\eta$'+' (m)')
+        ##plt.hold(True)
+        plt.grid()
 
+        plt.text(x_wm[1],0.6,'Wavemaker',color='red', fontsize=12,style='oblique')
+        plt.text(x_sponge[0]+20,0.6,'Sponge Layer',color='black',
+                fontsize=12,style='oblique')
 
-# save figure
-fig.savefig('eta_1d_wave.png', dpi=fig.dpi) # save figure
+        ax.axis([0, 1024, -1, 1])
+        plt.minorticks_on()
+        plt.xlabel('X (m)')
+        plt.ylabel(r'$\eta$'+' (m)')
+
+        # save figure
+        fig.savefig('output/eta_1d_wave_' + filename.lstrip(prefix) + '.png', dpi=fig.dpi) # save figure
