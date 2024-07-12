@@ -67,4 +67,4 @@ for filename in sorted(os.listdir(fdir), key=str.casefold):
         plt.ylabel(r'$\eta$'+' (m)')
 
         # save figure
-        fig.savefig('output/eta_1d_wave_' + filename.lstrip(prefix) + '.png', dpi=fig.dpi) # save figure
+        fig.savefig('output/py/eta_1d_wave_' + filename.lstrip(prefix) + '.png', dpi=fig.dpi) # save figure
