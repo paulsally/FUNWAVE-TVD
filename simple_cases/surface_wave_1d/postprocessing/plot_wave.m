@@ -22,7 +22,7 @@ len=4;
 set(gcf,'units','inches','paperunits','inches','papersize', [wid len],'position',[1 1 wid len],'paperposition',[0 0 wid len]);
 clf
 
-outputDir = [fdir '../postprocessing/output/m'];
+outputDir = [fdir '../postprocessing/output/reg/m'];
 files = dir(strcat(fdir, 'eta_*'));
 
 close all;

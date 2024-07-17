@@ -15,7 +15,7 @@ import asyncio
 
 base_dir = "/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/"
 output_files_dir = rf"{base_dir}output_files_reg/" 
-output_dir = rf"{base_dir}postprocessing/output/py/"
+output_dir = rf"{base_dir}postprocessing/output/reg/py/"
 
 m = 1024
 dx = 1.0
@@ -87,7 +87,7 @@ for index, of in enumerate(output_files_x_imgs):
 
 
 # Define the codec and create a VideoWriter object
-output_video = 'output_video.mp4'
+output_video = 'video_wave_reg.mp4'
 
 async def save_video(par_imgs_paths, par_output_dir, par_output_video):
     # Define video parameters
