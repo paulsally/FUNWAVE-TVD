@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 
 # write your OWN PC folder path for fdir
 # Remember that we use for Mac & Linux machines '/', while on windows '\'
-fdir = '/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/surface_wave_1d/surface_wave_1D/' 
+#fdir = '/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/output_files_solitary/' 
+
+base_dir = "/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/"
+output_files_dir = rf"{base_dir}output_files_solitary/" 
+output_dir = rf"{base_dir}postprocessing/output/solitary/py/"
 
 m = 1024      
 dx = 1.0      
@@ -39,7 +43,7 @@ for num in range(len(files)):
     fnum = '%.5d' % files[num]
 
    
-    eta = np.loadtxt(fdir+'eta_'+fnum)
+    eta = np.loadtxt(output_files_dir+'eta_'+fnum)
 
     ax = fig.add_subplot(len(files),1,num+1)
     fig.subplots_adjust(hspace=1,wspace=.5)
@@ -54,4 +58,4 @@ for num in range(len(files)):
 
 
 # save figure
-fig.savefig('eta_1d_solitary.png', dpi=fig.dpi) # save figure
+fig.savefig(output_dir + 'eta_1d_solitary.png', dpi=fig.dpi) # save figure
