@@ -3,7 +3,7 @@ FUNWAVE_DIR = ../../..
 WORK_DIR    = .
 COMPILER    = gnu
 PARALLEL    = true
-EXEC        = funwave
+EXEC        = funwave_tohoku_tsunami
 PRECISION   = single
 
 #-----------DEFINE FLAGS-----------------------------
@@ -18,6 +18,8 @@ PRECISION   = single
 # FLAG_8  = -DCHECK_MASS_CONSERVATION
 # FLAG_9  = -DTMP
 # FLAG_10 = -DTRACKING
+
+FLAG_1 = -DOUBLE_PRECISION
 
 #----------------uncommon options---------------------
 DEF_FC      = 

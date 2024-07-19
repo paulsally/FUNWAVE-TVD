@@ -8,9 +8,9 @@ import matplotlib as mat
 
 # write your OWN PC folder path for fdir and dep
 # Remember that we use for Mac & Linux machines '/', while on windows '\'
-dep=np.loadtxt('/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/Tohoku_tsunami/depth_30min.txt')
+dep=np.loadtxt('/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/tohoku_tsunami/postprocessing/depth_30min.txt')
 
-fdir = '/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/Tohoku_tsunami/tohoku_tsunami/'
+fdir = '/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/tohoku_tsunami/work/output/'
 
 # define bathy location
 n,m = np.shape(dep)
@@ -55,4 +55,4 @@ for num in range(len(nfile)):
 
     mat.rcParams.update({'font.size': 10})
 # save figure  
-fig.savefig('eta_tsunami.png', dpi=fig.dpi)
+fig.savefig('output/eta_tsunami.png', dpi=fig.dpi)
