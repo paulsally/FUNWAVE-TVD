@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 # write your OWN PC folder path for fdir and dep.
 # Remember that we use for Mac & Linux machines '/', while on windows '\'
-dep=np.loadtxt('/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/Tohoku_tsunami/depth_30min.txt')
+dep=np.loadtxt('/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/tohoku_tsunami/postprocessing/depth_30min.txt')
 
 # define bathy location
 n,m = np.shape(dep)
@@ -36,4 +36,4 @@ cbar=plt.colorbar()
 cbar.set_label('Bathymetry (m)', rotation=90)
 
 # save figure
-fig.savefig('tsunami_bathy.png', dpi=fig.dpi)
+fig.savefig('output/tsunami_bathy.png', dpi=fig.dpi)

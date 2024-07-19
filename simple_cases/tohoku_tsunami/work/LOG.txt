@@ -103,3 +103,286 @@
  -------------- OUTPUT INFO -----------------
  RESULT_FOLDER:output/                                           
  FIELD_IO_TYPE = ASCII                                                                           
+         OUTPUT_RES NOT FOUND, OUTPUT_RES=1: full resolution
+     OUTPUT_RES         1
+      EtaBlowVal Default:  100xmax_depth
+      OUT_DEPTH F
+          OUT_U F
+          OUT_V F
+        OUT_ETA T
+       OUT_Hmax T
+       OUT_Hmin F
+       OUT_Umax F
+      OUT_MFmax F
+     OUT_VORmax F
+       OUT_MASK F
+      OUT_MASK9 F
+      OUT_Umean F
+      OUT_Vmean F
+    OUT_ETAmean F
+ OUT_WaveHeight F
+        OUT_SXL F
+        OUT_SXR F
+        OUT_SYL F
+        OUT_SYR F
+    OUT_SourceX F
+    OUT_SourceY F
+          OUT_P F
+          OUT_Q F
+         OUT_Fx F
+         OUT_Fy F
+         OUT_Gx F
+         OUT_Gy F
+        OUT_AGE F
+     OUT_ROLLER F
+   OUT_UNDERTOW F
+         OUT_NU F
+        OUT_TMP F
+       OUT_TIME F
+                                          
+  --------------input end --------------
+                                          
+   WaveMakerPointNum Default:  30 points
+                                        TIDAL_BC_ABS not defined, Default: False
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.0000E+00  0.0000E+00
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+  0.1068E+12  0.1501E+23  0.5230E+04 -0.1000E+02  0.2180E+00  0.1220E+00
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2284E+00  0.1053E+03  0.2169E-02  0.0000E+00
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     1  TIME/TOTAL:        0.000 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.3603E+04  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.1194E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.7361E+01  0.4393E+01
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.7519E+01  0.1255E+02  0.5992E+00  0.3778E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     2  TIME/TOTAL:     3602.673 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.7205E+04  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.1612E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1320E+02  0.1853E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.1981E+02  0.1250E+02  0.1584E+01  0.2944E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     3  TIME/TOTAL:     7205.358 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.1081E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.1846E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1907E+02  0.2027E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2126E+02  0.1251E+02  0.1700E+01  0.2364E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     4  TIME/TOTAL:    10808.046 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.1441E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.1938E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1903E+02  0.1981E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2052E+02  0.1252E+02  0.1639E+01  0.1930E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     5  TIME/TOTAL:    14410.733 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.1801E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2037E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1910E+02  0.2079E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2138E+02  0.1252E+02  0.1708E+01  0.1594E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     6  TIME/TOTAL:    18013.393 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.2162E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2092E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1920E+02  0.2154E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2560E+02  0.1587E+02  0.1614E+01  0.1390E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     7  TIME/TOTAL:    21616.018 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.2522E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2119E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1927E+02  0.2029E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2117E+02  0.1575E+02  0.1344E+01  0.1192E+12
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     8  TIME/TOTAL:    25218.643 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.2882E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2181E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1934E+02  0.2131E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2572E+02  0.1564E+02  0.1645E+01  0.9511E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.     9  TIME/TOTAL:    28821.268 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.3242E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2174E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1938E+02  0.2060E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2153E+02  0.1548E+02  0.1391E+01  0.8390E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    10  TIME/TOTAL:    32423.893 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.3603E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2183E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1939E+02  0.2036E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2131E+02  0.1526E+02  0.1396E+01  0.7422E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    11  TIME/TOTAL:    36026.629 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.3963E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2206E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1940E+02  0.2020E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2112E+02  0.1501E+02  0.1407E+01  0.6069E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    12  TIME/TOTAL:    39629.379 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.4323E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2196E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1940E+02  0.2008E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2104E+02  0.1476E+02  0.1425E+01  0.5384E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    13  TIME/TOTAL:    43232.129 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.4683E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2209E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2003E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2101E+02  0.1452E+02  0.1447E+01  0.4859E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    14  TIME/TOTAL:    46834.879 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.5044E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2195E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2003E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2103E+02  0.1433E+02  0.1468E+01  0.4384E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    15  TIME/TOTAL:    50437.629 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.5404E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2209E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2004E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2106E+02  0.1417E+02  0.1486E+01  0.3988E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    16  TIME/TOTAL:    54040.379 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.5764E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2230E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2001E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2101E+02  0.1406E+02  0.1495E+01  0.3662E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    17  TIME/TOTAL:    57643.129 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.6125E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2216E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2001E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2097E+02  0.1397E+02  0.1501E+01  0.3356E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    18  TIME/TOTAL:    61245.879 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.6485E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2225E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2001E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2095E+02  0.1391E+02  0.1506E+01  0.3118E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    19  TIME/TOTAL:    64848.629 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.6845E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2210E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2001E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2096E+02  0.1388E+02  0.1510E+01  0.2886E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    20  TIME/TOTAL:    68451.180 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.7205E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2192E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2001E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2096E+02  0.1386E+02  0.1512E+01  0.2649E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    21  TIME/TOTAL:    72053.680 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.7566E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2185E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1941E+02  0.2001E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2095E+02  0.1385E+02  0.1512E+01  0.2452E+11
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    22  TIME/TOTAL:    75656.180 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.7920E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2230E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1854E+02  0.1984E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2093E+02  0.1387E+02  0.1509E+01  0.6069E+10
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    23  TIME/TOTAL:    79202.391 /   86400.000
+ ----------------- STATISTICS ----------------
+  TIME        DT
+  0.8280E+05  0.5629E+02
+  MassVolume  Energy      MaxEta      MinEta      Max U       Max V 
+ -0.2215E+13  0.1501E+23  0.5230E+04 -0.9250E+01  0.1854E+02  0.1981E+02
+  MaxTotalU   PhaseS      Froude      WetDryMass
+  0.2091E+02  0.1389E+02  0.1505E+01  0.6127E+10
+  TideWest    TideEast      TideSouth    TideNorth
+  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
+   PRINTING FILE NO.    24  TIME/TOTAL:    82804.891 /   86400.000
+ Simulation takes   39.2668610     seconds
+ Normal Termination!
