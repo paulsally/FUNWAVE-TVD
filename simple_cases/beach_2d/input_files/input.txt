@@ -16,7 +16,7 @@ TITLE = 2D_beach
    !              DEPTH_TYPE=SLOPE: idealized slope,  
    !                                 need slope,SLP starting point, Xslp 
    !                                 and depth_flat 
- DEPTH_TYPE = SLOPE 
+DEPTH_TYPE = SLOPE 
   ! if depth is flat and slope, specify flat_depth
 DEPTH_FLAT = 8.0
   if depth is slope, specify slope and starting point
@@ -25,7 +25,7 @@ Xslp = 300.0
    ! -------------------PRINT--------------------------------- 
    ! PRINT*, 
    ! result folder 
-RESULT_FOLDER = output/ 
+RESULT_FOLDER = output_reg/ 
    ! ------------------DIMENSION----------------------------- 
    ! global grid dimension 
  Mglob = 250
@@ -58,18 +58,14 @@ RESULT_FOLDER = output/
    !                 and then use Wei and Kirby 1999  
    !          need input WaveCompFile (including 3 columns: per,amp,pha) 
    !          NumWaveComp,PeakPeriod,DEP_WK,Xc_WK,Ywidth_WK 
-WAVEMAKER = WK_IRR
+WAVEMAKER = WK_REG
 DEP_WK = 8.0 
 Xc_WK = 150.0 
 Yc_WK = 0.0 
-FreqPeak = 0.0833 
-FreqMin = 0.05
-FreqMax = 0.3 
-Hmo = 1.0 
-GammaTMA = 5.0 
-ThetaPeak = 0.0 
-Sigma_Theta = 10.0 
-
+Tperiod = 8.0 
+AMP_WK = 0.5 
+Theta_WK = 0.0 
+Delta_WK = 3.0
   ! ---------------- PERIODIC BOUNDARY CONDITION --------- 
   ! South-North periodic boundary condition 
   ! 
@@ -130,10 +126,9 @@ NumberStations = 0
 STATIONS_FILE = gauges.txt 
   ! output variables, T=.TRUE, F = .FALSE. 
 DEPTH_OUT = T 
-U = F 
-V = F 
+U = T 
+V = T 
 ETA = T 
-ETAscreen = T
 Hmax = F 
 Hmin = F 
 MFmax = F 
