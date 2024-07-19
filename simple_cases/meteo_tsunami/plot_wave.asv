@@ -1,7 +1,7 @@
 clear all
 fdir='/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/meteo_tsunami/output/';
-
-eta=load([fdir 'eta_00001'], "-ascii");
+/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/meteo_tsunami/output/eta_00001
+eta=load([fdir 'eta_00001']);
 
 [n,m]=size(eta);
 dx=500.0;
@@ -22,7 +22,7 @@ clf
 for num=1:length(nfile)
     
 fnum=sprintf('%.5d',nfile(num));
-eta=load([fdir 'eta_' fnum], "-ascii");
+eta=load([fdir 'eta_' fnum]);
 
 subplot(6,1,num)
 plot(x(:),eta(50,:),'LineWidth',1.5)
