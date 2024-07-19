@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os
 # write your OWN PC folder path for fdir
 # Remember that we use for Mac & Linux machines '/', while on windows '\'
-fdir = r'../input_files/output_reg_30deg/'
+fdir = r'../input_files/output_irr/'
 
 # upload eta file
 eta=np.loadtxt(os.path.join(fdir,'eta_00001'))
@@ -70,4 +70,4 @@ for num in range(len(nfile)):
         
 
 # save figure  
-fig.savefig('output_reg_30deg/eta_2d_wave.png', dpi=fig.dpi)
+fig.savefig('output_irr/eta_2d_wave.png', dpi=fig.dpi)
