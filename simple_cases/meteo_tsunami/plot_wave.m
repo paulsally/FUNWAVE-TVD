@@ -18,27 +18,29 @@ len=8;
 set(gcf,'units','inches','paperunits','inches','papersize', [wid len],'position',[1 1 wid len],'paperposition',[0 0 wid len]);
 clf
 
-
 for num=1:length(nfile)
     
-fnum=sprintf('%.5d',nfile(num));
-eta=load([fdir 'eta_' fnum], "-ascii");
+    fnum=sprintf('%.5d',nfile(num));
+    eta=load([fdir 'eta_' fnum], "-ascii");
+    
+    subplot(6,1,num)
+    fig = plot(x(:),eta(50,:),'LineWidth',1.5)
+    axis([0 300000 -0.5 1])
+    grid
+    
+    title([' Time = ' min{num} ' hr '])
+    
+    
+    ylabel(' eta (m) ')
+    
+    if(num==length(nfile))
+        xlabel(' x (m) ')
+    end
 
-subplot(6,1,num)
-plot(x(:),eta(50,:),'LineWidth',1.5)
-axis([0 300000 -0.5 1])
-grid
 
-title([' Time = ' min{num} ' hr '])
+    set(gcf,'Renderer','zbuffer')
 
-
-ylabel(' eta (m) ')
-
-if(num==length(nfile))
-xlabel(' x (m) ')
 end
 
-
-set(gcf,'Renderer','zbuffer')
-
-end
+outputFile = fullfile([fdir, '../output_postprocessed'], 'wave_plt.png');
+saveas(fig, outputFile);
