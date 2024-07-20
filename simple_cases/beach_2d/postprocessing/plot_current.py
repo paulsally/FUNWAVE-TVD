@@ -3,10 +3,11 @@
 # import necessary modules
 import numpy as np               
 import matplotlib.pyplot as plt
+import os
 
 # write your OWN PC folder path for fdir
 # Remember that we use for Mac & Linux machines '/', while on windows '\', the r denotes raw string
-fdir = r'/Users/Gaby/Desktop/Postprocessing-Workshop/simple_cases_output/beach_2D/beach_2D/'
+fdir = r'../input_files/output_reg_30deg/'
 
 # upload eta file
 eta = np.loadtxt(os.path.join(fdir,'eta_00001'))
@@ -55,7 +56,7 @@ for num in range(len(nfile)):
     
     title = 'Time = '+min[num]+ ' sec'
     plt.title(title)
-    plt.hold(True)
+    #plt.hold(True)
 
     sk=8
 
@@ -82,4 +83,4 @@ for num in range(len(nfile)):
         cbar.set_label('Hsig (m)', rotation=90)
 
 # save figure        
-fig.savefig('curr_2d_wave.png', dpi=fig.dpi)
+fig.savefig('output_current/curr_reg_30deg_2d.png', dpi=fig.dpi)
