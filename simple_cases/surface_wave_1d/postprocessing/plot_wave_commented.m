@@ -6,7 +6,7 @@ clear all
 % -----------------------
 
 % Directory of output data files
-fdir='/Users/fengyanshi15/tmp1/';
+fdir='/Users/fengyanshi/OUTSIDE_Google/GITHUB/FUNWAVE-TVD/simple_cases/surface_wave_1d/input_files/output/';
 
 
 % Time series file to load
