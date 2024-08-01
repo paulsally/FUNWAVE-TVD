@@ -7,4 +7,9 @@ mytvd
 *~
 *.*~
 
-**.DS_Store
+# Ignore log files 
+**/LOG.txt
+**/time_dt.out
+
+
+**/.DS_Store
