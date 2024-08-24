@@ -1,9 +1,9 @@
 #-----------BEGIN MAKEFILE---------------------------
 FUNWAVE_DIR = ../../..
 WORK_DIR    = .
-COMPILER    = gnu
+COMPILER    = intel
 PARALLEL    = true
-EXEC        = funwave_surface_wave_beach_2d
+EXEC        = funwave_beach_2d
 PRECISION   = single
 
 #-----------DEFINE FLAGS-----------------------------
