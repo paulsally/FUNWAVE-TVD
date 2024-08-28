@@ -13,9 +13,9 @@ import cv2
 # To execute coode asynchronously
 import asyncio
 
-base_dir = "/Users/polselli/Code/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/"
+base_dir = "/Users/polselli/_CODE_/funwave/FUNWAVE-TVD/simple_cases/surface_wave_1d/"
 output_files_dir = rf"{base_dir}output_files_reg/" 
-output_dir = rf"{base_dir}postprocessing/output/reg/py/"
+output_dir = rf"/Users/polselli/_OUTPUT_/funwave/trial-1/simple_cases/surface_wave_1d/reg/"
 
 m = 1024
 dx = 1.0
